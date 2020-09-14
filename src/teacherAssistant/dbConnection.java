@@ -50,8 +50,7 @@ public class dbConnection {
 				privilege = (int) result.getInt(3);
 				return privilege;
 			}
-		} 
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			System.out.println(e);
 		}
 
@@ -205,6 +204,24 @@ public class dbConnection {
 			return 3;
 		}
 
+	}
+
+	public int getClassTblSize() {
+		String new_query = "select size from class_tables where ID=2";
+		int size = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet result = stmt.executeQuery(new_query);
+			if (result.next()) {
+				size = result.getInt(1);
+			}
+			return size;
+
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		return 0;
 	}
 
 } // end class

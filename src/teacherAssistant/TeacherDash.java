@@ -219,23 +219,24 @@ public class TeacherDash extends JFrame {
 	}
 
 	public JPanel bldAsgnStgPnl() {
-
 		JPanel asgnStg = new JPanel();
+		
 		// foo. note to self: return to editing here //
-		try {
-			ImageIO.read(new File("images\\chair_rsz.png"));
-			BufferedImage image = ImageIO.read(new File("images\\chair_rsz.png"));
-			ImageIcon icon = new ImageIcon(image);
-			JLabel label = new JLabel(icon);
+		
+		int tblSize = conn.getClassTblSize();
+		
+		JLabel[] labelList = new JLabel[tblSize];
 
-			asgnStg.add(label);
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		for (int i = 0; i < tblSize; i++) {
+			labelList[i] = makeChair();
+		}
+
+		for (int i = 0; i < tblSize; i++) {
+			asgnStg.add(labelList[i]);
 		}
 
 		JButton backBtn = new JButton("Back");
 		asgnStg.add(backBtn);
-		System.out.println("sanity");
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
 		return asgnStg;
 	}
@@ -390,6 +391,22 @@ public class TeacherDash extends JFrame {
 
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
 		return vwAsgnmtPnl;
+	}
+
+	public JLabel makeChair() {
+		JLabel lbl = new JLabel();
+
+		try {
+			ImageIO.read(new File("images\\chair_rsz.png"));
+			BufferedImage image = ImageIO.read(new File("images\\chair_rsz.png"));
+			ImageIcon icon = new ImageIcon(image);
+			lbl.setIcon(icon);
+			return lbl;
+		} catch (IOException e1) {
+			lbl.setText("Err: Image Not Found");
+			e1.printStackTrace();
+			return lbl;
+		}
 	}
 
 }
