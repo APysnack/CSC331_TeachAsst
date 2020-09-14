@@ -35,7 +35,7 @@ public class AdminDash extends JFrame {
 	String[] usrTypes;
 
 	// ------------------------------------------------------------------------ //
-	// Main Window
+	// 								Main Window
 	// ------------------------------------------------------------------------ //
 
 	AdminDash(dbConnection conn) {

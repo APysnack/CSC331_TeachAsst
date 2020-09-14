@@ -4,12 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,6 +43,7 @@ public class TeacherDash extends JFrame {
 	// ------------------------------------------------------------------------ //
 
 	TeacherDash(dbConnection conn) {
+
 		this.conn = conn;
 
 		this.setSize(900, 550);
@@ -133,10 +140,18 @@ public class TeacherDash extends JFrame {
 		clsAtndPnl.add(vwAtndBtn);
 		clsAtndPnl.add(backBtn);
 
-		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
 		rcrdAtndBtn.addActionListener(e -> cl.show(scrnMgr, "Record Attendance"));
 		vwAtndBtn.addActionListener(e -> cl.show(scrnMgr, "View Attendance"));
-		asgnStgBtn.addActionListener(e -> cl.show(scrnMgr, "Assign Seating"));
+
+		asgnStgBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel asgnStgPnl = bldAsgnStgPnl();
+				scrnMgr.add(asgnStgPnl, "Assign Seating");
+				cl.show(scrnMgr, "Assign Seating");
+			}
+		});
+
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
 
 		return clsAtndPnl;
 	}
@@ -204,9 +219,24 @@ public class TeacherDash extends JFrame {
 	}
 
 	public JPanel bldAsgnStgPnl() {
+
 		JPanel asgnStg = new JPanel();
-		JButton backBtn = new JButton("back");
-		backBtn.addActionListener(e -> cl.show(scrnMgr, "Assign Seating"));
+		// foo. note to self: return to editing here //
+		try {
+			ImageIO.read(new File("images\\chair_rsz.png"));
+			BufferedImage image = ImageIO.read(new File("images\\chair_rsz.png"));
+			ImageIcon icon = new ImageIcon(image);
+			JLabel label = new JLabel(icon);
+
+			asgnStg.add(label);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		JButton backBtn = new JButton("Back");
+		asgnStg.add(backBtn);
+		System.out.println("sanity");
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
 		return asgnStg;
 	}
 
@@ -252,7 +282,7 @@ public class TeacherDash extends JFrame {
 		crtAsgnmtPnl.add(asgnmtDateFld);
 		crtAsgnmtPnl.add(crtAsgnmtBtn);
 		crtAsgnmtPnl.add(backBtn);
-		
+
 		if (error_flag == 0) {
 			JLabel success = new JLabel("Assignment added successfully");
 			crtAsgnmtPnl.add(success);
@@ -278,8 +308,6 @@ public class TeacherDash extends JFrame {
 			crtAsgnmtPnl.add(frmt_err2);
 			error_flag = -1;
 		}
-		
-
 
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
 
@@ -292,7 +320,7 @@ public class TeacherDash extends JFrame {
 				String date = asgnmtDateFld.getText();
 
 				error_flag = conn.addAssignment(id, title, details, points, date);
-				
+
 				JPanel crtAsgnmtPnl = bldCrtAsgnmtPnl();
 				scrnMgr.add(crtAsgnmtPnl, "Create Assignment");
 				cl.show(scrnMgr, "Create Assignment");
@@ -303,7 +331,7 @@ public class TeacherDash extends JFrame {
 	}
 
 	public JPanel bldDelAsgnmtPnl() {
-		
+
 		JPanel delAsgnmtPnl = new JPanel();
 
 		JLabel delAsgnmtLbl = new JLabel("Select Assignment to Delete (cannot be undone)");
@@ -315,15 +343,14 @@ public class TeacherDash extends JFrame {
 		delAsgnmtPnl.add(delAsgnmtFld);
 		delAsgnmtPnl.add(delAsgnmtBtn);
 		delAsgnmtPnl.add(backBtn);
-		
+
 		if (error_flag == 0) {
 			JLabel success = new JLabel("Assignment Deleted Successfully");
 			delAsgnmtPnl.add(success);
 		} else if (error_flag == 1) {
 			JLabel duplicate = new JLabel("Assignment ID Not found");
 			delAsgnmtPnl.add(duplicate);
-		}
-		else if (error_flag == 3) {
+		} else if (error_flag == 3) {
 			JLabel error = new JLabel("There was an unknown error with your request");
 			delAsgnmtPnl.add(error);
 		}
@@ -333,7 +360,7 @@ public class TeacherDash extends JFrame {
 		delAsgnmtBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				error_flag = conn.removeRow("assignments", delAsgnmtFld.getText());
-				
+
 				JPanel delAsgnmtPnl = bldDelAsgnmtPnl();
 				scrnMgr.add(delAsgnmtPnl, "Delete Assignment");
 				cl.show(scrnMgr, "Delete Assignment");
