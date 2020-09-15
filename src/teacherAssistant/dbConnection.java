@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.JLabel;
@@ -222,6 +223,29 @@ public class dbConnection {
 		}
 
 		return 0;
+	}
+
+	public ArrayList getTblStdnts() {
+		String new_query = "select * from students where tableID=2;";
+		ArrayList tblList = new ArrayList();
+
+		Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			stmt.executeQuery(new_query);
+			ResultSet result = stmt.getResultSet();
+			ResultSetMetaData metadata = result.getMetaData();
+
+			while (result.next()) {
+				tblList.add(result.getString(1));
+			}
+
+			return tblList;
+
+		} catch (SQLException e) {
+			System.out.println(e);
+			return tblList;
+		}
 	}
 
 } // end class

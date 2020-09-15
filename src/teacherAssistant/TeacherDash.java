@@ -13,6 +13,7 @@ import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -221,18 +222,25 @@ public class TeacherDash extends JFrame {
 	public JPanel bldAsgnStgPnl() {
 		JPanel asgnStg = new JPanel();
 		
-		// foo. note to self: return to editing here //
-		
+		// foo. note to self to continue editing from here
+
 		int tblSize = conn.getClassTblSize();
 		
 		JLabel[] labelList = new JLabel[tblSize];
-
+		
 		for (int i = 0; i < tblSize; i++) {
 			labelList[i] = makeChair();
 		}
+		
 
 		for (int i = 0; i < tblSize; i++) {
 			asgnStg.add(labelList[i]);
+		}
+		
+		ArrayList tblStdnts = conn.getTblStdnts();
+
+		for (int i = 0; i < tblStdnts.size(); i++) {
+			System.out.println(tblStdnts.get(i));
 		}
 
 		JButton backBtn = new JButton("Back");
