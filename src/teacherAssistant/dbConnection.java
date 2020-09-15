@@ -5,6 +5,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JLabel;
@@ -207,8 +208,8 @@ public class dbConnection {
 
 	}
 
-	public int getClassTblSize() {
-		String new_query = "select size from class_tables where ID=2";
+	public int getClassTblSize(int tblNum) {
+		String new_query = "select size from class_tables where ID=" + tblNum + ";";
 		int size = 0;
 		try {
 			Statement stmt = conn.createStatement();
@@ -224,9 +225,30 @@ public class dbConnection {
 
 		return 0;
 	}
+	
+	public List<Integer> getClassTblSizes() {
+		String new_query = "select id, size from class_tables;";
+		
+		List<Integer> tblSizes = new ArrayList<>();
+		
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet result = stmt.executeQuery(new_query);
+			
+			while (result.next()) {
+				tblSizes.add(result.getInt(1));
+				tblSizes.add(result.getInt(2));
+			}
 
-	public ArrayList getTblStdnts() {
-		String new_query = "select * from students where tableID=2;";
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		return tblSizes;
+	}
+
+	public ArrayList getTblStdnts(int tblNum) {
+		String new_query = "select * from students where tableID=" + tblNum + ";";
 		ArrayList tblList = new ArrayList();
 
 		Statement stmt;
@@ -248,4 +270,27 @@ public class dbConnection {
 		}
 	}
 
+	public ArrayList getAllStdnts() {
+		String new_query = "select * from students;";
+		ArrayList tblList = new ArrayList();
+
+		Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			stmt.executeQuery(new_query);
+			ResultSet result = stmt.getResultSet();
+			ResultSetMetaData metadata = result.getMetaData();
+
+			while (result.next()) {
+				tblList.add(result.getString(1));
+			}
+
+			return tblList;
+
+		} catch (SQLException e) {
+			System.out.println(e);
+			return tblList;
+		}
+	}
+	
 } // end class

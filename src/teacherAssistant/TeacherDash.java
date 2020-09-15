@@ -14,10 +14,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -221,26 +223,47 @@ public class TeacherDash extends JFrame {
 
 	public JPanel bldAsgnStgPnl() {
 		JPanel asgnStg = new JPanel();
-		
-		// foo. note to self to continue editing from here
 
-		int tblSize = conn.getClassTblSize();
-		
+		int tblSize = conn.getClassTblSize(1);
+
+		List<Integer> tblSizes = new ArrayList<>();
+		List<String> tblDataList = new ArrayList<>();
+		tblSizes = conn.getClassTblSizes();
+
+		String temp_string = "";
+		// NOTE: double check this math. Note to continue working from here. foo.
+		for (int i = 0; i < ((tblSizes.size() / 2) + 2); i++) {
+			temp_string = "Table " + tblSizes.get(i).toString() + ": " + tblSizes.get(i + 1).toString() + " Seats";
+			tblDataList.add(temp_string);
+
+			i++;
+		}
+
+		JComboBox tblMenu = new JComboBox(tblDataList.toArray());
+
+		asgnStg.add(tblMenu);
+
+		for (int i = 0; i < tblSizes.size(); i++) {
+		}
+
+		// creates a tblSize number of chairs
 		JLabel[] labelList = new JLabel[tblSize];
-		
+
+		// gets list of all students at a particular table
+		ArrayList tblStdnts = conn.getTblStdnts(3);
+
 		for (int i = 0; i < tblSize; i++) {
 			labelList[i] = makeChair();
-		}
-		
-
-		for (int i = 0; i < tblSize; i++) {
+			ArrayList allStdnts = conn.getAllStdnts();
+			JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
 			asgnStg.add(labelList[i]);
-		}
-		
-		ArrayList tblStdnts = conn.getTblStdnts();
-
-		for (int i = 0; i < tblStdnts.size(); i++) {
-			System.out.println(tblStdnts.get(i));
+			asgnStg.add(stdntMenu);
+			if (tblStdnts.size() > i) {
+				stdntMenu.setSelectedItem(tblStdnts.get(i));
+			} else {
+				stdntMenu.insertItemAt("", 0);
+				stdntMenu.setSelectedIndex(0);
+			}
 		}
 
 		JButton backBtn = new JButton("Back");
