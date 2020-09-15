@@ -141,9 +141,11 @@ public class TeacherDash extends JFrame {
 		JButton rcrdAtndBtn = new JButton("Record Attendance");
 		JButton vwAtndBtn = new JButton("View Attendance");
 		JButton asgnStgBtn = new JButton("Assign Seating Charts");
+		JButton mdfyTblBtn = new JButton("Modify Table");
 		JButton backBtn = new JButton("Back");
 
 		clsAtndPnl.add(asgnStgBtn);
+		clsAtndPnl.add(mdfyTblBtn);
 		clsAtndPnl.add(rcrdAtndBtn);
 		clsAtndPnl.add(vwAtndBtn);
 		clsAtndPnl.add(backBtn);
@@ -156,6 +158,14 @@ public class TeacherDash extends JFrame {
 				JPanel asgnStgPnl = bldAsgnStgPnl(1);
 				scrnMgr.add(asgnStgPnl, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
+			}
+		});
+
+		mdfyTblBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel mdfyTblPnl = bldMdfyTblPnl();
+				scrnMgr.add(mdfyTblPnl, "Modify Table");
+				cl.show(scrnMgr, "Modify Table");
 			}
 		});
 
@@ -272,7 +282,7 @@ public class TeacherDash extends JFrame {
 			}
 		});
 
-		// sets the scurrently elected table to the one selected in the function
+		// sets the currently selected table to the one selected in the function
 		// argument
 		tblMenu.setSelectedItem("Table " + selectTbl + ": " + tblMaxSize + " Seats");
 		asgnStg.add(tblMenu);
@@ -311,6 +321,7 @@ public class TeacherDash extends JFrame {
 
 		JLabel unLabel = new JLabel("Currently Unassigned: ");
 		JComboBox unassigned = new JComboBox(unassignedStdnts.toArray());
+		JButton randomize = new JButton("Randomize Seats");
 		asgnStg.add(unLabel);
 		asgnStg.add(unassigned);
 
@@ -335,6 +346,7 @@ public class TeacherDash extends JFrame {
 		JButton backBtn = new JButton("Back");
 		JButton submit = new JButton("Submit Changes");
 		asgnStg.add(submit);
+		asgnStg.add(randomize);
 		asgnStg.add(backBtn);
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
 
@@ -351,7 +363,7 @@ public class TeacherDash extends JFrame {
 				}
 
 				conn.updateTableSeats(selectTbl, seatList);
-				
+
 				JPanel asgnStg = bldAsgnStgPnl(selectTbl);
 				scrnMgr.add(asgnStg, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
@@ -360,8 +372,153 @@ public class TeacherDash extends JFrame {
 
 		});
 
+		randomize.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				conn.randomizeTables();
+
+				JPanel asgnStg = bldAsgnStgPnl(selectTbl);
+				scrnMgr.add(asgnStg, "Assign Seating");
+				cl.show(scrnMgr, "Assign Seating");
+			}
+		});
+
 		return asgnStg;
 
+	}
+
+	public JPanel bldMdfyTblPnl() {
+		JPanel mdfyTblPnl = new JPanel();
+
+		// will store all table data (tblname1, tblcapacity1, tblname2, tblcapcity2,
+		// etc.)
+		List<Integer> tblSizeData = new ArrayList<>();
+
+		// will contain a string-formatted list of above table data (e.g. table 1: 5
+		// seats)
+		List<String> tblDataList = new ArrayList<>();
+
+		// Gets the table names and sizes from the database
+		tblSizeData = conn.getClassTblSizes();
+
+		// placeholder string to store each iteration of string format into tblDataList
+		String temp_string = "";
+
+		// k will increment in steps of 1, l will increment in 2's
+		int l = 0;
+		int k = 1;
+
+		// while k < the number of tables in the array (not the number of indexes)
+		while (k <= (tblSizeData.size() / 2)) {
+
+			// i'th element is table name, i+1'th element is table's capacity
+			temp_string = "Table " + tblSizeData.get(l).toString() + ": " + tblSizeData.get(l + 1).toString()
+					+ " Seats";
+			tblDataList.add(temp_string);
+
+			// increments k for the number of elements in the array
+			k++;
+			l = l + 2;
+		}
+
+		JComboBox tblMenu = new JComboBox(tblDataList.toArray());
+
+		JLabel addTblLbl = new JLabel("Add New Table");
+		JLabel tblNameLbl = new JLabel("New Table ID");
+		JTextField tblNameTxtFld = new JTextField("", 15);
+		JLabel tblCapacityLbl = new JLabel("Table Max Capacity");
+		JTextField tblCapacityTxtFld = new JTextField("", 15);
+		JButton addTblBtn = new JButton("Add Table");
+		JLabel delTblLbl = new JLabel("Delete Table (Cannot be Undone)");
+		JButton delTblBtn = new JButton("Delete Table");
+		JButton backBtn = new JButton("Back");
+
+		mdfyTblPnl.add(addTblLbl);
+		mdfyTblPnl.add(tblNameLbl);
+		mdfyTblPnl.add(tblNameTxtFld);
+		mdfyTblPnl.add(tblCapacityLbl);
+		mdfyTblPnl.add(tblCapacityTxtFld);
+		mdfyTblPnl.add(addTblBtn);
+		mdfyTblPnl.add(delTblLbl);
+		mdfyTblPnl.add(tblMenu);
+		mdfyTblPnl.add(delTblBtn);
+		mdfyTblPnl.add(backBtn);
+
+		if (error_flag == 0) {
+			JLabel success = new JLabel("Table added successfully");
+			mdfyTblPnl.add(success);
+			error_flag = -1;
+		}
+
+		else if (error_flag == 1) {
+			JLabel duplicate = new JLabel("Assignment ID Not found");
+			error_flag = -1;
+		}
+
+		else if (error_flag == 3) {
+			JLabel error = new JLabel("There was an unknown error with your request");
+			mdfyTblPnl.add(error);
+			error_flag = -1;
+		}
+
+		else if (error_flag == 4) {
+			JLabel errLbl = new JLabel("Table ID and Capacity must be strictly integers");
+			mdfyTblPnl.add(errLbl);
+			error_flag = -1;
+		}
+		
+		else if (error_flag == 5) {
+			JLabel rmvLbl = new JLabel("Table deleted successfully");
+			mdfyTblPnl.add(rmvLbl);
+			error_flag = -1;
+		}
+
+		addTblBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				String tblID = tblNameTxtFld.getText();
+				String tblCapacity = tblCapacityTxtFld.getText();
+
+				if (tblID.matches("[0-9]+") && tblID.length() > 0 && tblCapacity.matches("[0-9]+")
+						&& tblCapacity.length() > 0) {
+					int tblIDNum = Integer.parseInt(tblID);
+					int tblCapacityNum = Integer.parseInt(tblCapacity);
+					error_flag = conn.addClsTbl(tblIDNum, tblCapacityNum);
+
+				} else {
+					error_flag = 4;
+				}
+
+				JPanel mdfyTblPnl = bldMdfyTblPnl();
+				scrnMgr.add(mdfyTblPnl, "Modify Table");
+				cl.show(scrnMgr, "Modify Table");
+
+			}
+		});
+
+		delTblBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				String str = tblMenu.getSelectedItem().toString();
+				str = str.substring(6, 8);
+
+				// replaces all non-digits with blanks
+				// Selected table is the currently selected table name
+				int selectedTbl = Integer.parseInt(str.replaceAll("[\\D]", ""));
+
+				error_flag = conn.delClsTbl(selectedTbl);
+
+				if (error_flag == 0) {
+					error_flag = 5;
+				}
+
+				JPanel mdfyTblPnl = bldMdfyTblPnl();
+				scrnMgr.add(mdfyTblPnl, "Modify Table");
+				cl.show(scrnMgr, "Modify Table");
+			}
+		});
+
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
+
+		return mdfyTblPnl;
 	}
 
 	public JPanel bldRcrdAtndPnl() {

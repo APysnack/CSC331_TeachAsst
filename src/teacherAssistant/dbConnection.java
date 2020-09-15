@@ -5,6 +5,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -208,6 +209,7 @@ public class dbConnection {
 
 	}
 
+	// gets the size of an individual table (arg0)
 	public int getClassTblSize(int tblNum) {
 		String new_query = "select size from class_tables where ID=" + tblNum + ";";
 		int size = 0;
@@ -226,6 +228,8 @@ public class dbConnection {
 		return 0;
 	}
 
+	// gets the names/sizes of each table and stores in list {tblName1, tblSize1,
+	// tblName2, tblSize2..}
 	public List<Integer> getClassTblSizes() {
 		String new_query = "select id, size from class_tables;";
 
@@ -247,6 +251,7 @@ public class dbConnection {
 		return tblSizes;
 	}
 
+	// gets all students that are assigned to table arg0
 	public ArrayList getTblStdnts(int tblNum) {
 		String new_query = "select * from students where tableID=" + tblNum + ";";
 		ArrayList tblList = new ArrayList();
@@ -270,6 +275,7 @@ public class dbConnection {
 		}
 	}
 
+	// gets ID's of all students in the database
 	public ArrayList getAllStdnts() {
 		String new_query = "select * from students;";
 		ArrayList tblList = new ArrayList();
@@ -293,6 +299,7 @@ public class dbConnection {
 		}
 	}
 
+	// takes a list of names and assigns them all to the table in arg0
 	public int updateTableSeats(int tableID, List<String> seatList) {
 		String resetTable = "update students set tableID=0 where tableID=" + tableID + ";";
 
@@ -302,6 +309,7 @@ public class dbConnection {
 
 		} catch (SQLException e) {
 			System.out.println(e);
+			return 1;
 		}
 
 		for (int i = 0; i < seatList.size(); i++) {
@@ -314,10 +322,92 @@ public class dbConnection {
 
 			} catch (SQLException e) {
 				System.out.println(e);
+				return 1;
 			}
 		}
 
 		return 0;
+	}
+
+	public int addClsTbl(int tblID, int tblSize) {
+		String new_query = "insert into class_tables values(" + tblID + "," + tblSize + ");";
+
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(new_query);
+			return 0;
+		} catch (SQLException e) {
+			System.out.println(e);
+			return 3;
+		}
+
+	}
+
+	public int delClsTbl(int tblID) {
+		String new_query = "delete from class_tables where ID=" + tblID + ";";
+
+		try {
+			Statement stmt = conn.createStatement();
+			int rowsAffected = stmt.executeUpdate(new_query);
+			if (rowsAffected == 0) {
+				return 1;
+			} else {
+				String resetTable = "update students set tableID=0 where tableID=" + tblID + ";";
+
+				try {
+					stmt = conn.createStatement();
+					stmt.executeUpdate(resetTable);
+					return 0;
+
+				} catch (SQLException e) {
+					System.out.println(e);
+					return 3;
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println(e);
+			return 3;
+		}
+
+	}
+
+	public void randomizeTables() {
+		// list: {tblName1, tblSize1, tblName2, tblSize2..}
+		List<Integer> tableContents = getClassTblSizes();
+
+		ArrayList studentNames = getAllStdnts();
+		Collections.shuffle(studentNames);
+
+		int i = 0;
+		int j = 0;
+		int k = 1;
+
+		// while k is less than the number of tables
+		while (k <= (tableContents.size() / 2)) {
+
+			// gets the capacity of the table i
+			int tableCapacity = tableContents.get(i + 1);
+
+			List<String> stdnts = new ArrayList<>();
+
+			// makes a list of students the size of table i's capacity
+			for (int l = 0; l < tableCapacity; l++) {
+				if (j < studentNames.size()) {
+					stdnts.add(studentNames.get(j).toString());
+				}
+				j++;
+			}
+
+			// updates table i with the listed students
+			updateTableSeats(tableContents.get(i), stdnts);
+
+			System.out.println(i);
+			System.out.println(j);
+			System.out.println(k);
+
+			k++;
+			i = i + 2;
+		}
 	}
 
 } // end class
