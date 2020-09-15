@@ -225,16 +225,16 @@ public class dbConnection {
 
 		return 0;
 	}
-	
+
 	public List<Integer> getClassTblSizes() {
 		String new_query = "select id, size from class_tables;";
-		
+
 		List<Integer> tblSizes = new ArrayList<>();
-		
+
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet result = stmt.executeQuery(new_query);
-			
+
 			while (result.next()) {
 				tblSizes.add(result.getInt(1));
 				tblSizes.add(result.getInt(2));
@@ -292,5 +292,32 @@ public class dbConnection {
 			return tblList;
 		}
 	}
-	
+
+	public int updateTableSeats(int tableID, List<String> seatList) {
+		String resetTable = "update students set tableID=0 where tableID=" + tableID + ";";
+
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(resetTable);
+
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		for (int i = 0; i < seatList.size(); i++) {
+			String name = seatList.get(i);
+			String addName = "update students set tableID=" + tableID + " where ID='" + name + "';";
+
+			try {
+				Statement stmt = conn.createStatement();
+				stmt.executeUpdate(addName);
+
+			} catch (SQLException e) {
+				System.out.println(e);
+			}
+		}
+
+		return 0;
+	}
+
 } // end class

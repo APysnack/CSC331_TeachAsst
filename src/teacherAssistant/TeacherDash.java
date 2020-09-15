@@ -10,6 +10,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +30,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 public class TeacherDash extends JFrame {
@@ -148,7 +153,7 @@ public class TeacherDash extends JFrame {
 
 		asgnStgBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JPanel asgnStgPnl = bldAsgnStgPnl();
+				JPanel asgnStgPnl = bldAsgnStgPnl(1);
 				scrnMgr.add(asgnStgPnl, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
 			}
@@ -221,55 +226,142 @@ public class TeacherDash extends JFrame {
 		return clsBhvrPnl;
 	}
 
-	public JPanel bldAsgnStgPnl() {
+	public JPanel bldAsgnStgPnl(int selectTbl) {
 		JPanel asgnStg = new JPanel();
 
-		int tblSize = conn.getClassTblSize(1);
+		// will store all table data (tblname1, tblcapacity1, tblname2, tblcapcity2,
+		// etc.)
+		List<Integer> tblSizeData = new ArrayList<>();
 
-		List<Integer> tblSizes = new ArrayList<>();
+		// will contain a string-formatted list of above table data (e.g. table 1: 5
+		// seats)
 		List<String> tblDataList = new ArrayList<>();
-		tblSizes = conn.getClassTblSizes();
 
+		// Gets the table names and sizes from the database
+		tblSizeData = conn.getClassTblSizes();
+
+		// placeholder string to store each iteration of string format into tblDataList
 		String temp_string = "";
-		// NOTE: double check this math. Note to continue working from here. foo.
-		for (int i = 0; i < ((tblSizes.size() / 2) + 2); i++) {
-			temp_string = "Table " + tblSizes.get(i).toString() + ": " + tblSizes.get(i + 1).toString() + " Seats";
+
+		// k will increment in steps of 1, l will increment in 2's
+		int l = 0;
+		int k = 1;
+
+		// while k < the number of tables in the array (not the number of indexes)
+		while (k <= (tblSizeData.size() / 2)) {
+
+			// i'th element is table name, i+1'th element is table's capacity
+			temp_string = "Table " + tblSizeData.get(l).toString() + ": " + tblSizeData.get(l + 1).toString()
+					+ " Seats";
 			tblDataList.add(temp_string);
 
-			i++;
+			// increments k for the number of elements in the array
+			k++;
+			l = l + 2;
 		}
 
-		JComboBox tblMenu = new JComboBox(tblDataList.toArray());
+		// gets the max size of the individual table selected
+		int tblMaxSize = conn.getClassTblSize(selectTbl);
 
+		// sets focus on the menu with the list of tables
+		JComboBox tblMenu = new JComboBox(tblDataList.toArray());
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				tblMenu.requestFocus();
+			}
+		});
+
+		// sets the scurrently elected table to the one selected in the function
+		// argument
+		tblMenu.setSelectedItem("Table " + selectTbl + ": " + tblMaxSize + " Seats");
 		asgnStg.add(tblMenu);
 
-		for (int i = 0; i < tblSizes.size(); i++) {
-		}
+		// gets list of all students and all students at the selected table
+		ArrayList allStdnts = conn.getAllStdnts();
+		ArrayList tblStdnts = conn.getTblStdnts(selectTbl);
+		ArrayList unassignedStdnts = conn.getTblStdnts(0);
 
-		// creates a tblSize number of chairs
-		JLabel[] labelList = new JLabel[tblSize];
+		// creates an array of labels to store n images
+		JLabel[] labelList = new JLabel[tblMaxSize];
+		JComboBox[] menuList = new JComboBox[tblMaxSize];
 
-		// gets list of all students at a particular table
-		ArrayList tblStdnts = conn.getTblStdnts(3);
+		for (int i = 0; i < tblMaxSize; i++) {
 
-		for (int i = 0; i < tblSize; i++) {
+			// for each seat at the table, creates a chair icon and dropdown box
 			labelList[i] = makeChair();
-			ArrayList allStdnts = conn.getAllStdnts();
 			JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
+
+			// sets the first field of the dropdown box to be empty
+			stdntMenu.insertItemAt("", 0);
+
+			// adds chair and dropdown box to the panel
 			asgnStg.add(labelList[i]);
 			asgnStg.add(stdntMenu);
+
+			// for tables with more seats than students, sets those seats to empty
 			if (tblStdnts.size() > i) {
 				stdntMenu.setSelectedItem(tblStdnts.get(i));
 			} else {
-				stdntMenu.insertItemAt("", 0);
 				stdntMenu.setSelectedIndex(0);
 			}
+
+			menuList[i] = stdntMenu;
 		}
 
+		JLabel unLabel = new JLabel("Currently Unassigned: ");
+		JComboBox unassigned = new JComboBox(unassignedStdnts.toArray());
+		asgnStg.add(unLabel);
+		asgnStg.add(unassigned);
+
+		// responds when user changes an option in the table menu
+		tblMenu.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent evt) {
+				// gets the currently selected table from the drop down menu
+				String str = tblMenu.getSelectedItem().toString();
+				str = str.substring(6, 8);
+
+				// replaces all non-digits with blanks
+				// Selected table is the currently selected table name
+				int selectedTbl = Integer.parseInt(str.replaceAll("[\\D]", ""));
+
+				JPanel asgnStg = bldAsgnStgPnl(selectedTbl);
+				scrnMgr.add(asgnStg, "Assign Seating");
+				cl.show(scrnMgr, "Assign Seating");
+
+			}
+		});
+
 		JButton backBtn = new JButton("Back");
+		JButton submit = new JButton("Submit Changes");
+		asgnStg.add(submit);
 		asgnStg.add(backBtn);
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
+
+		submit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				List<String> seatList = new ArrayList();
+
+				for (int i = 0; i < tblMaxSize; i++) {
+					if (menuList[i].getSelectedItem().toString() == "") {
+
+					} else {
+						seatList.add(menuList[i].getSelectedItem().toString());
+					}
+				}
+
+				conn.updateTableSeats(selectTbl, seatList);
+				
+				JPanel asgnStg = bldAsgnStgPnl(selectTbl);
+				scrnMgr.add(asgnStg, "Assign Seating");
+				cl.show(scrnMgr, "Assign Seating");
+
+			}
+
+		});
+
 		return asgnStg;
+
 	}
 
 	public JPanel bldRcrdAtndPnl() {
