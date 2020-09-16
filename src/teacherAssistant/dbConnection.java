@@ -411,21 +411,45 @@ public class dbConnection {
 		}
 	}
 
-	public int addGrades(int assignmentID, String assignmentTitle, String stdntName, double stdntGrade) {
-		String new_query = "insert into grades values(" + assignmentID + ", '" + assignmentTitle + "', '" + stdntName
-				+ "'," + stdntGrade + ");";
+	public int addGrades(int assignmentID, String assignmentTitle, String stdntName, double stdntGrade, String mode) {
+		String new_query = "";
 
-		try {
-			Statement stmt = conn.createStatement();
-			stmt.executeUpdate(new_query);
-			return 0;
+		if (mode.equalsIgnoreCase("Edit")) {
+			new_query = "delete from grades where assignmentID=" + assignmentID + " and studentID='" + stdntName + "';";
 
-		} catch (SQLIntegrityConstraintViolationException e) {
-			System.out.println(e);
-			return 2;
-		} catch (SQLException e) {
-			System.out.println(e);
-			return 3;
+			try {
+				Statement stmt = conn.createStatement();
+				int rowsAffected = stmt.executeUpdate(new_query);
+
+				if (rowsAffected == 0) {
+					return 1;
+				}
+
+				int returnValue = addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade, "Add");
+				return returnValue;
+
+			} catch (SQLException e) {
+				System.out.println(e);
+				return 3;
+			}
+
+		}
+
+		else {
+			new_query = "insert into grades values(" + assignmentID + ", '" + assignmentTitle + "', '" + stdntName
+					+ "'," + stdntGrade + ");";
+
+			try {
+				Statement stmt = conn.createStatement();
+				stmt.executeUpdate(new_query);
+				return 0;
+			} catch (SQLIntegrityConstraintViolationException e) {
+				System.out.println(e);
+				return 2;
+			} catch (SQLException e) {
+				System.out.println(e);
+				return 3;
+			}
 		}
 	}
 

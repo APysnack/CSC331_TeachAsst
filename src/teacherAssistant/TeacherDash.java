@@ -327,7 +327,7 @@ public class TeacherDash extends JFrame {
 
 				if (grdTxtFld.getText().matches("^[0-9]*\\.?[0-9]+$") && grdTxtFld.getText().length() > 0) {
 					double stdntGrade = Double.parseDouble(grdTxtFld.getText());
-					error_flag = conn.addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade);
+					error_flag = conn.addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade, "Add");
 				} else {
 					error_flag = 4;
 
@@ -345,8 +345,102 @@ public class TeacherDash extends JFrame {
 
 	public JPanel bldEdtGrdPnl() {
 		JPanel edtGrdPnl = new JPanel();
+		JButton sbmtGrdBtn = new JButton("Submit Grade");
 		JButton backBtn = new JButton("Back");
+		JLabel grdLbl = new JLabel("Grade For This Assignment");
+		JTextField grdTxtFld = new JTextField("", 10);
+
+		ArrayList asgnmtLst = conn.getAllAsgnmts();
+		List<String> asgnmtDataLst = new ArrayList<>();
+
+		ArrayList allStdnts = conn.getAllStdnts();
+		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
+		
+		JLabel lbl = new JLabel();
+		
+		if (error_flag == 4) {
+			lbl.setText("ERROR: Grades may only contain numbers");
+			error_flag = -1;
+		} else {
+			lbl = check_errors("Grade");
+		}
+
+		String temp_string = "";
+
+		int l = 0;
+		int k = 1;
+
+		while (k <= (asgnmtLst.size() / 2)) {
+
+			temp_string = "Assignment Number " + asgnmtLst.get(l).toString() + ": " + asgnmtLst.get(l + 1).toString();
+			asgnmtDataLst.add(temp_string);
+
+			// increments k for the number of elements in the array
+			k++;
+			l = l + 2;
+		}
+
+		JComboBox asgnmtMenu = new JComboBox(asgnmtDataLst.toArray());
+		JTable table = conn.getJTable("grades");
+		JScrollPane scrollPane = new JScrollPane(table);
+
+		JPanel pad = new JPanel();
+		pad.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+		edtGrdPnl.add(asgnmtMenu);
+		edtGrdPnl.add(stdntMenu);
+		edtGrdPnl.add(grdLbl);
+		edtGrdPnl.add(grdTxtFld);
+		edtGrdPnl.add(sbmtGrdBtn);
+		edtGrdPnl.add(lbl);
+		edtGrdPnl.add(scrollPane);
 		edtGrdPnl.add(backBtn);
+
+		sbmtGrdBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				String tempString = asgnmtMenu.getSelectedItem().toString();
+
+				int i = 0;
+				int assignmentID = 0;
+				String num = "";
+				String assignmentTitle = "";
+
+				while (i < tempString.length()) {
+					if (tempString.charAt(i) == ':') {
+						assignmentTitle = tempString.substring((i + 2), tempString.length());
+						break;
+					}
+
+					if (Character.isDigit(tempString.charAt(i))) {
+						while (Character.isDigit(tempString.charAt(i))) {
+							num = num + tempString.charAt(i);
+							i++;
+						}
+						continue;
+					}
+
+					i++;
+				}
+
+				assignmentID = Integer.parseInt(num);
+
+				String stdntName = stdntMenu.getSelectedItem().toString();
+
+				if (grdTxtFld.getText().matches("^[0-9]*\\.?[0-9]+$") && grdTxtFld.getText().length() > 0) {
+					double stdntGrade = Double.parseDouble(grdTxtFld.getText());
+					error_flag = conn.addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade, "edit");
+				} else {
+					error_flag = 4;
+
+				}
+
+				JPanel edtGrdPnl = bldEdtGrdPnl();
+				scrnMgr.add(edtGrdPnl, "Edit Grade");
+				cl.show(scrnMgr, "Edit Grade");
+			}
+		});
+
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Grades"));
 		return edtGrdPnl;
 	}
