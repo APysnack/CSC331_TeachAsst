@@ -216,9 +216,11 @@ public class TeacherDash extends JFrame {
 		JPanel clsGrdPnl = new JPanel();
 		JButton addGrdBtn = new JButton("Add Grade");
 		JButton edtGrdBtn = new JButton("Edit Grade");
+		JButton stdntGrdBtn = new JButton("Student Grades");
 		JButton backBtn = new JButton("Back");
 		clsGrdPnl.add(addGrdBtn);
 		clsGrdPnl.add(edtGrdBtn);
+		clsGrdPnl.add(stdntGrdBtn);
 		clsGrdPnl.add(backBtn);
 
 		addGrdBtn.addActionListener(new ActionListener() {
@@ -234,6 +236,14 @@ public class TeacherDash extends JFrame {
 				JPanel edtGrdPnl = bldEdtGrdPnl();
 				scrnMgr.add(edtGrdPnl, "Edit Grade");
 				cl.show(scrnMgr, "Edit Grade");
+			}
+		});
+
+		stdntGrdBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel stdntGrdPnl = bldStdntGrdPnl();
+				scrnMgr.add(stdntGrdPnl, "Student Grades");
+				cl.show(scrnMgr, "Student Grades");
 			}
 		});
 
@@ -253,9 +263,9 @@ public class TeacherDash extends JFrame {
 
 		ArrayList allStdnts = conn.getAllStdnts();
 		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
-		
+
 		JLabel lbl = new JLabel();
-		
+
 		if (error_flag == 4) {
 			lbl.setText("ERROR: Grades may only contain numbers");
 			error_flag = -1;
@@ -279,7 +289,11 @@ public class TeacherDash extends JFrame {
 		}
 
 		JComboBox asgnmtMenu = new JComboBox(asgnmtDataLst.toArray());
-		JTable table = conn.getJTable("grades");
+
+		String override_query = "!select grades.assignmentID, grades.assignmentTitle, grades.studentID, grades.grade, "
+				+ "assignments.points from grades inner join assignments on assignments.id = grades.assignmentID;";
+
+		JTable table = conn.getJTable(override_query);
 		JScrollPane scrollPane = new JScrollPane(table);
 
 		JPanel pad = new JPanel();
@@ -355,9 +369,9 @@ public class TeacherDash extends JFrame {
 
 		ArrayList allStdnts = conn.getAllStdnts();
 		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
-		
+
 		JLabel lbl = new JLabel();
-		
+
 		if (error_flag == 4) {
 			lbl.setText("ERROR: Grades may only contain numbers");
 			error_flag = -1;
@@ -379,9 +393,13 @@ public class TeacherDash extends JFrame {
 			k++;
 			l = l + 2;
 		}
-
+		
 		JComboBox asgnmtMenu = new JComboBox(asgnmtDataLst.toArray());
-		JTable table = conn.getJTable("grades");
+		
+		String override_query = "!select grades.assignmentID, grades.assignmentTitle, grades.studentID, grades.grade, "
+				+ "assignments.points from grades inner join assignments on assignments.id = grades.assignmentID;";
+		
+		JTable table = conn.getJTable(override_query);
 		JScrollPane scrollPane = new JScrollPane(table);
 
 		JPanel pad = new JPanel();
@@ -443,6 +461,20 @@ public class TeacherDash extends JFrame {
 
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Grades"));
 		return edtGrdPnl;
+	}
+
+	public JPanel bldStdntGrdPnl() {
+		JPanel stdntGrdPnl = new JPanel();
+
+		JTable table = conn.getJTable("Students");
+		JScrollPane dataScrollPane = new JScrollPane(table);
+
+		stdntGrdPnl.add(dataScrollPane);
+
+		JButton backBtn = new JButton("Back");
+		stdntGrdPnl.add(backBtn);
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Grades"));
+		return stdntGrdPnl;
 	}
 
 	public JPanel bldClsBhvrPnl() {
@@ -743,16 +775,15 @@ public class TeacherDash extends JFrame {
 		JLabel asgnmtDateLbl = new JLabel("Due Date (YYYY-MM-DD)");
 		JTextField asgnmtDateFld = new JTextField("", 6);
 		JButton backBtn = new JButton("Back");
-		
-		
+
 		JPanel dtlPanl = new JPanel(new GridLayout(2, 1, 0, 0));
-		
+
 		JLabel asgnmtDtlLbl = new JLabel("Assignment Details");
 		JTextArea asgnmtDtlArea = new JTextArea(5, 20);
 		asgnmtDtlArea.setEditable(true);
 		asgnmtDtlArea.setLineWrap(true);
 		JScrollPane dtlScrollPane = new JScrollPane(asgnmtDtlArea);
-		
+
 		JPanel pad = new JPanel();
 		pad.setBorder(new EmptyBorder(5, 5, 5, 5));
 		JPanel pad2 = new JPanel();
@@ -763,34 +794,30 @@ public class TeacherDash extends JFrame {
 		pad.setBorder(new EmptyBorder(5, 5, 5, 5));
 		JPanel pad5 = new JPanel();
 		pad.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
+
 		JPanel backBtnComposite = new JPanel(new GridLayout(1, 5, 0, 0));
 		backBtnComposite.add(pad);
 		backBtnComposite.add(pad2);
 		backBtnComposite.add(backBtn);
 		backBtnComposite.add(pad3);
 		backBtnComposite.add(pad4);
-		
-		
+
 		JPanel txtAreaComposite = new JPanel(new BorderLayout(0, 7));
-		
+
 		txtAreaComposite.add(asgnmtDtlLbl, BorderLayout.NORTH);
 		txtAreaComposite.add(dtlScrollPane, BorderLayout.CENTER);
 		txtAreaComposite.add(backBtnComposite, BorderLayout.SOUTH);
-	
-		
-		
+
 		dtlPanl.add(txtAreaComposite);
 		dtlPanl.add(pad5);
-		
+
 		JPanel middleComposite = new JPanel(new GridLayout(1, 2, 5, 5));
-		
 
 		JTable table = conn.getJTable("Assignments");
 		JScrollPane dataScrollPane = new JScrollPane(table);
 		middleComposite.add(dataScrollPane);
 		middleComposite.add(dtlPanl);
-		
+
 		JPanel compositePnl = new JPanel();
 
 		compositePnl.add(asgnmtIDLbl);
@@ -802,7 +829,7 @@ public class TeacherDash extends JFrame {
 		compositePnl.add(asgnmtDateLbl);
 		compositePnl.add(asgnmtDateFld);
 		compositePnl.add(crtAsgnmtBtn);
-		
+
 		crtAsgnmtPnl.add(compositePnl, BorderLayout.NORTH);
 		crtAsgnmtPnl.add(middleComposite, BorderLayout.CENTER);
 
@@ -852,7 +879,7 @@ public class TeacherDash extends JFrame {
 
 		JTable table = conn.getJTable("Assignments");
 		JScrollPane scrollPane = new JScrollPane(table);
-		
+
 		delAsgnmtPnl.add(delAsgnmtLbl);
 		delAsgnmtPnl.add(delAsgnmtFld);
 		delAsgnmtPnl.add(delAsgnmtBtn);
@@ -882,7 +909,7 @@ public class TeacherDash extends JFrame {
 				} else {
 					error_flag = 4;
 				}
-				
+
 				JPanel delAsgnmtPnl = bldDelAsgnmtPnl();
 				scrnMgr.add(delAsgnmtPnl, "Delete Assignment");
 				cl.show(scrnMgr, "Delete Assignment");

@@ -16,6 +16,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import com.mysql.cj.util.StringUtils;
 
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
@@ -129,7 +130,17 @@ public class dbConnection {
 
 	public JTable getJTable(String tbl) {
 
-		String new_query = "Select * from " + tbl + ";";
+		String new_query = "";
+		
+		char first_letter = tbl.charAt(0);
+		
+		// built so user can override the default query 
+		if(first_letter == '!') {
+			new_query = tbl.substring(1, tbl.length());
+		}
+		else {
+			new_query = "Select * from " + tbl + ";";
+		}
 
 		try {
 
@@ -338,11 +349,9 @@ public class dbConnection {
 			stmt.executeUpdate(new_query);
 			return 0;
 		} catch (SQLIntegrityConstraintViolationException e) {
-			System.out.println(e);
 			return 2;
 
 		} catch (SQLException e) {
-			System.out.println(e);
 			return 3;
 		}
 
@@ -442,12 +451,13 @@ public class dbConnection {
 			try {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate(new_query);
+
+				updateGrade(stdntName);
+
 				return 0;
 			} catch (SQLIntegrityConstraintViolationException e) {
-				System.out.println(e);
 				return 2;
 			} catch (SQLException e) {
-				System.out.println(e);
 				return 3;
 			}
 		}
@@ -477,4 +487,62 @@ public class dbConnection {
 		}
 	}
 
-} // end class
+	public int updateGrade(String studentID) {
+
+		double grade = getGrade(studentID);
+
+		String new_query = "update students set grade=" + grade + " where ID='" + studentID + "';";
+
+		try {
+			Statement stmt = conn.createStatement();
+			int rowsAffected = stmt.executeUpdate(new_query);
+			if (rowsAffected == 0) {
+				return 1;
+			} else {
+				return 0;
+			}
+		} catch (SQLException e) {
+			System.out.println(e);
+			return 3;
+		}
+	}
+
+	public double getGrade(String studentID) {
+		String new_query = "select grades.studentID, grades.grade, assignments.points, assignments.id, "
+				+ "assignments.title from grades inner join assignments on assignments.ID = grades.assignmentid"
+				+ " where studentID=?";
+
+		PreparedStatement stmt;
+		try {
+
+			double scoreSum = 0;
+			double ptsPossible = 0;
+			double total = 0.0;
+			
+			// uses a prepared statement to execute query
+			stmt = conn.prepareStatement(new_query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			
+			// sets first ? value in prepared statement to studentID.
+			stmt.setString(1, studentID);
+			ResultSet result = stmt.executeQuery();
+
+			if (result.next()) {
+				result.beforeFirst();
+				while (result.next()) {
+					scoreSum += result.getFloat(2);
+					ptsPossible += result.getFloat(3);
+				}
+
+				if (ptsPossible > 0) {
+					total = ((scoreSum / ptsPossible) * 100);
+					return total;
+				}
+			}
+			return total;
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+		return 0;
+	}
+}
+// end class
