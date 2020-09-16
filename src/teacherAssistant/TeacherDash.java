@@ -262,6 +262,15 @@ public class TeacherDash extends JFrame {
 
 		ArrayList allStdnts = conn.getAllStdnts();
 		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
+		
+		JLabel lbl = new JLabel();
+		
+		if (error_flag == 4) {
+			lbl.setText("ERROR: Grades may only contain numbers");
+			error_flag = -1;
+		} else {
+			lbl = check_errors("Grade");
+		}
 
 		String temp_string = "";
 
@@ -279,12 +288,19 @@ public class TeacherDash extends JFrame {
 		}
 
 		JComboBox asgnmtMenu = new JComboBox(asgnmtDataLst.toArray());
+		JTable table = conn.getJTable("grades");
+		JScrollPane scrollPane = new JScrollPane(table);
+
+		JPanel pad = new JPanel();
+		pad.setBorder(new EmptyBorder(10, 10, 10, 10));
 
 		addGrdPnl.add(asgnmtMenu);
 		addGrdPnl.add(stdntMenu);
 		addGrdPnl.add(grdLbl);
 		addGrdPnl.add(grdTxtFld);
 		addGrdPnl.add(sbmtGrdBtn);
+		addGrdPnl.add(lbl);
+		addGrdPnl.add(scrollPane);
 		addGrdPnl.add(backBtn);
 
 		sbmtGrdBtn.addActionListener(new ActionListener() {
@@ -317,8 +333,18 @@ public class TeacherDash extends JFrame {
 				assignmentID = Integer.parseInt(num);
 
 				String stdntName = stdntMenu.getSelectedItem().toString();
-				double stdntGrade = Double.parseDouble(grdTxtFld.getText());
-				conn.addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade);
+
+				if (grdTxtFld.getText().matches("^[0-9]*\\.?[0-9]+$") && grdTxtFld.getText().length() > 0) {
+					double stdntGrade = Double.parseDouble(grdTxtFld.getText());
+					error_flag = conn.addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade);
+				} else {
+					error_flag = 4;
+
+				}
+
+				JPanel addGrdPnl = bldAddGrdPnl();
+				scrnMgr.add(addGrdPnl, "Add Grade");
+				cl.show(scrnMgr, "Add Grade");
 			}
 		});
 
@@ -549,34 +575,16 @@ public class TeacherDash extends JFrame {
 		mdfyTblPnl.add(delTblBtn);
 		mdfyTblPnl.add(backBtn);
 
-		if (error_flag == 0) {
-			JLabel success = new JLabel("Table added successfully");
-			mdfyTblPnl.add(success);
+		JLabel lbl = new JLabel();
+
+		if (error_flag == 4) {
+			lbl.setText("ERROR: Table Names and Capacities can only use integers");
 			error_flag = -1;
+		} else {
+			lbl = check_errors("table");
 		}
 
-		else if (error_flag == 1) {
-			JLabel duplicate = new JLabel("Assignment ID Not found");
-			error_flag = -1;
-		}
-
-		else if (error_flag == 3) {
-			JLabel error = new JLabel("There was an unknown error with your request");
-			mdfyTblPnl.add(error);
-			error_flag = -1;
-		}
-
-		else if (error_flag == 4) {
-			JLabel errLbl = new JLabel("Table ID and Capacity must be strictly integers");
-			mdfyTblPnl.add(errLbl);
-			error_flag = -1;
-		}
-
-		else if (error_flag == 5) {
-			JLabel rmvLbl = new JLabel("Table deleted successfully");
-			mdfyTblPnl.add(rmvLbl);
-			error_flag = -1;
-		}
+		mdfyTblPnl.add(lbl);
 
 		addTblBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -670,31 +678,19 @@ public class TeacherDash extends JFrame {
 		crtAsgnmtPnl.add(crtAsgnmtBtn);
 		crtAsgnmtPnl.add(backBtn);
 
-		if (error_flag == 0) {
-			JLabel success = new JLabel("Assignment added successfully");
-			crtAsgnmtPnl.add(success);
-			error_flag = -1;
-		}
+		JLabel lbl = new JLabel();
 
-		else if (error_flag == 2) {
-			JLabel duplicate = new JLabel("An assignment with this ID exists");
-			crtAsgnmtPnl.add(duplicate);
-			error_flag = -1;
-		}
-
-		else if (error_flag == 3) {
-			JLabel error = new JLabel("There was an unknown error with your request");
-			crtAsgnmtPnl.add(error);
-			error_flag = -1;
-		}
-
-		else if (error_flag == 4) {
-			JLabel frmt_err = new JLabel("An error was detected in the format of your entry.");
+		if (error_flag == 4) {
+			JLabel frmt_err = new JLabel("ERROR: An error was detected in the format of your entry.");
 			JLabel frmt_err2 = new JLabel("Please double check your date format. Point/ID values must also be numeric");
 			crtAsgnmtPnl.add(frmt_err);
 			crtAsgnmtPnl.add(frmt_err2);
 			error_flag = -1;
+		} else {
+			lbl = check_errors("Assignment");
 		}
+
+		crtAsgnmtPnl.add(lbl);
 
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
 
@@ -731,22 +727,29 @@ public class TeacherDash extends JFrame {
 		delAsgnmtPnl.add(delAsgnmtBtn);
 		delAsgnmtPnl.add(backBtn);
 
-		if (error_flag == 0) {
-			JLabel success = new JLabel("Assignment Deleted Successfully");
-			delAsgnmtPnl.add(success);
-		} else if (error_flag == 1) {
-			JLabel duplicate = new JLabel("Assignment ID Not found");
-			delAsgnmtPnl.add(duplicate);
-		} else if (error_flag == 3) {
-			JLabel error = new JLabel("There was an unknown error with your request");
-			delAsgnmtPnl.add(error);
+		if (error_flag == 4) {
+			JLabel frmt_err = new JLabel("ERROR: An error was detected in the format of your entry.");
+			JLabel frmt_err2 = new JLabel("ID Must be a Positive Integer");
+			delAsgnmtPnl.add(frmt_err);
+			delAsgnmtPnl.add(frmt_err2);
+			error_flag = -1;
+		} else {
+			JLabel lbl = check_errors("Assignment");
+			delAsgnmtPnl.add(lbl);
 		}
 
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
 
 		delAsgnmtBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				error_flag = conn.removeRow("assignments", delAsgnmtFld.getText());
+
+				String asgnmtID = delAsgnmtFld.getText();
+
+				if (asgnmtID.matches("[0-9]+") && asgnmtID.length() > 0) {
+					error_flag = conn.removeRow("assignments", asgnmtID);
+				} else {
+					error_flag = 4;
+				}
 
 				JPanel delAsgnmtPnl = bldDelAsgnmtPnl();
 				scrnMgr.add(delAsgnmtPnl, "Delete Assignment");
@@ -793,6 +796,42 @@ public class TeacherDash extends JFrame {
 			e1.printStackTrace();
 			return lbl;
 		}
+	}
+
+	public JLabel check_errors(String vrbl) {
+		JLabel msg = new JLabel();
+
+		if (error_flag == 0) {
+			msg.setText(vrbl + " added successfully");
+		}
+
+		else if (error_flag == 1) {
+			msg.setText("ERROR: " + vrbl + " ID not found");
+		}
+
+		else if (error_flag == 2) {
+			msg.setText("ERROR: " + vrbl + " is a duplicate of another " + vrbl);
+		}
+
+		else if (error_flag == 3) {
+			msg.setText("ERROR: " + "There was an unknown error with your request");
+		}
+
+		else if (error_flag == 5) {
+			msg.setText(vrbl + " deleted successfully");
+		}
+
+		else if (error_flag == 6) {
+			msg.setText(vrbl + " updated successfully");
+		}
+
+		else {
+			msg.setText("");
+		}
+
+		error_flag = -1;
+
+		return msg;
 	}
 
 }

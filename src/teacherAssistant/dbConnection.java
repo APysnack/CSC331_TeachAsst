@@ -20,7 +20,8 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 // error_flag keys:
-// [0 : success, 1 : UsrDoesNotExist, 2: Duplicate User, 3 : too short, 4: function specific]
+// [0 : add success, 1 : DoesNotExist, 2: Duplicate, 3 : too short, 
+//	4: function specific, 5: delete success, 6: edit success]
 
 public class dbConnection {
 	String name;
@@ -91,7 +92,7 @@ public class dbConnection {
 			if (rowsAffected == 0) {
 				return 1;
 			} else {
-				return 0;
+				return 6;
 			}
 		}
 
@@ -116,7 +117,7 @@ public class dbConnection {
 				return 1;
 			} else {
 				// otherwise, command was successful
-				return 0;
+				return 5;
 			}
 		}
 
@@ -336,6 +337,10 @@ public class dbConnection {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(new_query);
 			return 0;
+		} catch (SQLIntegrityConstraintViolationException e) {
+			System.out.println(e);
+			return 2;
+
 		} catch (SQLException e) {
 			System.out.println(e);
 			return 3;
@@ -415,6 +420,9 @@ public class dbConnection {
 			stmt.executeUpdate(new_query);
 			return 0;
 
+		} catch (SQLIntegrityConstraintViolationException e) {
+			System.out.println(e);
+			return 2;
 		} catch (SQLException e) {
 			System.out.println(e);
 			return 3;
