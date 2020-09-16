@@ -189,7 +189,6 @@ public class TeacherDash extends JFrame {
 
 		clsAsgnmtPnl.add(crtAsgnmtBtn);
 		clsAsgnmtPnl.add(delAsgnmtBtn);
-		clsAsgnmtPnl.add(vwAsgnmtBtn);
 		clsAsgnmtPnl.add(backBtn);
 
 		crtAsgnmtBtn.addActionListener(new ActionListener() {
@@ -209,14 +208,6 @@ public class TeacherDash extends JFrame {
 		});
 
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
-
-		vwAsgnmtBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JPanel vwAsgnmtPnl = bldVwAsgnmtPnl();
-				scrnMgr.add(vwAsgnmtPnl, "View Assignment");
-				cl.show(scrnMgr, "View Assignment");
-			}
-		});
 
 		return clsAsgnmtPnl;
 	}
@@ -646,37 +637,80 @@ public class TeacherDash extends JFrame {
 	}
 
 	public JPanel bldCrtAsgnmtPnl() {
-		JPanel crtAsgnmtPnl = new JPanel();
+		JPanel crtAsgnmtPnl = new JPanel(new BorderLayout());
 
 		JLabel asgnmtIDLbl = new JLabel("Assignment ID");
-		JTextField asgnmtIDFld = new JTextField("", 10);
-		JButton crtAsgnmtBtn = new JButton("Create new assignment");
+		JTextField asgnmtIDFld = new JTextField("", 2);
+		JButton crtAsgnmtBtn = new JButton("Create Assignment");
 		JLabel asgnmtTtlLbl = new JLabel("Title");
-		JTextField asgnmtTtlFld = new JTextField("", 10);
-		JLabel asgnmtDtlLbl = new JLabel("Assignment Details");
+		JTextField asgnmtTtlFld = new JTextField("", 7);
 		JLabel asgnmtPtLbl = new JLabel("Assignment Points");
-		JTextField asgnmtPtFld = new JTextField("", 5);
+		JTextField asgnmtPtFld = new JTextField("", 3);
 		JLabel asgnmtDateLbl = new JLabel("Due Date (YYYY-MM-DD)");
-		JTextField asgnmtDateFld = new JTextField("", 10);
+		JTextField asgnmtDateFld = new JTextField("", 6);
 		JButton backBtn = new JButton("Back");
-
+		
+		
+		JPanel dtlPanl = new JPanel(new GridLayout(2, 1, 0, 0));
+		
+		JLabel asgnmtDtlLbl = new JLabel("Assignment Details");
 		JTextArea asgnmtDtlArea = new JTextArea(5, 20);
 		asgnmtDtlArea.setEditable(true);
-		JScrollPane scrollPane = new JScrollPane(asgnmtDtlArea);
+		asgnmtDtlArea.setLineWrap(true);
+		JScrollPane dtlScrollPane = new JScrollPane(asgnmtDtlArea);
+		
+		JPanel pad = new JPanel();
+		pad.setBorder(new EmptyBorder(5, 5, 5, 5));
+		JPanel pad2 = new JPanel();
+		pad.setBorder(new EmptyBorder(5, 5, 5, 5));
+		JPanel pad3 = new JPanel();
+		pad.setBorder(new EmptyBorder(5, 5, 5, 5));
+		JPanel pad4 = new JPanel();
+		pad.setBorder(new EmptyBorder(5, 5, 5, 5));
+		JPanel pad5 = new JPanel();
+		pad.setBorder(new EmptyBorder(5, 5, 5, 5));
+		
+		JPanel backBtnComposite = new JPanel(new GridLayout(1, 5, 0, 0));
+		backBtnComposite.add(pad);
+		backBtnComposite.add(pad2);
+		backBtnComposite.add(backBtn);
+		backBtnComposite.add(pad3);
+		backBtnComposite.add(pad4);
+		
+		
+		JPanel txtAreaComposite = new JPanel(new BorderLayout(0, 7));
+		
+		txtAreaComposite.add(asgnmtDtlLbl, BorderLayout.NORTH);
+		txtAreaComposite.add(dtlScrollPane, BorderLayout.CENTER);
+		txtAreaComposite.add(backBtnComposite, BorderLayout.SOUTH);
+	
+		
+		
+		dtlPanl.add(txtAreaComposite);
+		dtlPanl.add(pad5);
+		
+		JPanel middleComposite = new JPanel(new GridLayout(1, 2, 5, 5));
+		
 
-		crtAsgnmtPnl.add(scrollPane);
-		crtAsgnmtPnl.add(asgnmtIDLbl);
-		crtAsgnmtPnl.add(asgnmtIDFld);
-		crtAsgnmtPnl.add(asgnmtTtlLbl);
-		crtAsgnmtPnl.add(asgnmtTtlFld);
-		crtAsgnmtPnl.add(asgnmtDtlLbl);
-		crtAsgnmtPnl.add(asgnmtDtlArea);
-		crtAsgnmtPnl.add(asgnmtPtLbl);
-		crtAsgnmtPnl.add(asgnmtPtFld);
-		crtAsgnmtPnl.add(asgnmtDateLbl);
-		crtAsgnmtPnl.add(asgnmtDateFld);
-		crtAsgnmtPnl.add(crtAsgnmtBtn);
-		crtAsgnmtPnl.add(backBtn);
+		JTable table = conn.getJTable("Assignments");
+		JScrollPane dataScrollPane = new JScrollPane(table);
+		middleComposite.add(dataScrollPane);
+		middleComposite.add(dtlPanl);
+		
+		JPanel compositePnl = new JPanel();
+
+		compositePnl.add(asgnmtIDLbl);
+		compositePnl.add(asgnmtIDFld);
+		compositePnl.add(asgnmtTtlLbl);
+		compositePnl.add(asgnmtTtlFld);
+		compositePnl.add(asgnmtPtLbl);
+		compositePnl.add(asgnmtPtFld);
+		compositePnl.add(asgnmtDateLbl);
+		compositePnl.add(asgnmtDateFld);
+		compositePnl.add(crtAsgnmtBtn);
+		
+		crtAsgnmtPnl.add(compositePnl, BorderLayout.NORTH);
+		crtAsgnmtPnl.add(middleComposite, BorderLayout.CENTER);
 
 		JLabel lbl = new JLabel();
 
@@ -690,7 +724,7 @@ public class TeacherDash extends JFrame {
 			lbl = check_errors("Assignment");
 		}
 
-		crtAsgnmtPnl.add(lbl);
+		compositePnl.add(lbl);
 
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
 
@@ -722,10 +756,14 @@ public class TeacherDash extends JFrame {
 		JButton delAsgnmtBtn = new JButton("Delete Assignment");
 		JButton backBtn = new JButton("Back");
 
+		JTable table = conn.getJTable("Assignments");
+		JScrollPane scrollPane = new JScrollPane(table);
+		
 		delAsgnmtPnl.add(delAsgnmtLbl);
 		delAsgnmtPnl.add(delAsgnmtFld);
 		delAsgnmtPnl.add(delAsgnmtBtn);
 		delAsgnmtPnl.add(backBtn);
+		delAsgnmtPnl.add(scrollPane);
 
 		if (error_flag == 4) {
 			JLabel frmt_err = new JLabel("ERROR: An error was detected in the format of your entry.");
@@ -750,7 +788,7 @@ public class TeacherDash extends JFrame {
 				} else {
 					error_flag = 4;
 				}
-
+				
 				JPanel delAsgnmtPnl = bldDelAsgnmtPnl();
 				scrnMgr.add(delAsgnmtPnl, "Delete Assignment");
 				cl.show(scrnMgr, "Delete Assignment");
@@ -758,28 +796,6 @@ public class TeacherDash extends JFrame {
 		});
 
 		return delAsgnmtPnl;
-	}
-
-	public JPanel bldVwAsgnmtPnl() {
-		JPanel vwAsgnmtPnl = new JPanel(new GridLayout(3, 1, 2, 2));
-
-		JButton backBtn = new JButton("Back");
-
-		JTable table = conn.getJTable("assignments");
-		JScrollPane scrollPane = new JScrollPane(table);
-
-		JPanel pad = new JPanel();
-		pad.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-		vwAsgnmtPnl.add(scrollPane);
-		vwAsgnmtPnl.add(pad);
-		vwAsgnmtPnl.add(backBtn);
-
-		vwAsgnmtPnl.repaint();
-		vwAsgnmtPnl.revalidate();
-
-		backBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
-		return vwAsgnmtPnl;
 	}
 
 	public JLabel makeChair() {
