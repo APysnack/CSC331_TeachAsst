@@ -401,12 +401,47 @@ public class dbConnection {
 			// updates table i with the listed students
 			updateTableSeats(tableContents.get(i), stdnts);
 
-			System.out.println(i);
-			System.out.println(j);
-			System.out.println(k);
-
 			k++;
 			i = i + 2;
+		}
+	}
+
+	public int addGrades(int assignmentID, String assignmentTitle, String stdntName, double stdntGrade) {
+		String new_query = "insert into grades values(" + assignmentID + ", '" + assignmentTitle + "', '" + stdntName
+				+ "'," + stdntGrade + ");";
+
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(new_query);
+			return 0;
+
+		} catch (SQLException e) {
+			System.out.println(e);
+			return 3;
+		}
+	}
+
+	public ArrayList getAllAsgnmts() {
+		String new_query = "select * from assignments;";
+		ArrayList asgnmtList = new ArrayList();
+
+		Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			stmt.executeQuery(new_query);
+			ResultSet result = stmt.getResultSet();
+			ResultSetMetaData metadata = result.getMetaData();
+
+			while (result.next()) {
+				asgnmtList.add(result.getString(1));
+				asgnmtList.add(result.getString(2));
+			}
+
+			return asgnmtList;
+
+		} catch (SQLException e) {
+			System.out.println(e);
+			return asgnmtList;
 		}
 	}
 

@@ -16,6 +16,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,10 +223,115 @@ public class TeacherDash extends JFrame {
 
 	public JPanel bldClsGrdPnl() {
 		JPanel clsGrdPnl = new JPanel();
+		JButton addGrdBtn = new JButton("Add Grade");
+		JButton edtGrdBtn = new JButton("Edit Grade");
 		JButton backBtn = new JButton("Back");
+		clsGrdPnl.add(addGrdBtn);
+		clsGrdPnl.add(edtGrdBtn);
 		clsGrdPnl.add(backBtn);
+
+		addGrdBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel addGrdPnl = bldAddGrdPnl();
+				scrnMgr.add(addGrdPnl, "Add Grade");
+				cl.show(scrnMgr, "Add Grade");
+			}
+		});
+
+		edtGrdBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel edtGrdPnl = bldEdtGrdPnl();
+				scrnMgr.add(edtGrdPnl, "Edit Grade");
+				cl.show(scrnMgr, "Edit Grade");
+			}
+		});
+
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
 		return clsGrdPnl;
+	}
+
+	public JPanel bldAddGrdPnl() {
+		JPanel addGrdPnl = new JPanel();
+		JButton sbmtGrdBtn = new JButton("Submit Grade");
+		JButton backBtn = new JButton("Back");
+		JLabel grdLbl = new JLabel("Grade For This Assignment");
+		JTextField grdTxtFld = new JTextField("", 10);
+
+		ArrayList asgnmtLst = conn.getAllAsgnmts();
+		List<String> asgnmtDataLst = new ArrayList<>();
+
+		ArrayList allStdnts = conn.getAllStdnts();
+		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
+
+		String temp_string = "";
+
+		int l = 0;
+		int k = 1;
+
+		while (k <= (asgnmtLst.size() / 2)) {
+
+			temp_string = "Assignment Number " + asgnmtLst.get(l).toString() + ": " + asgnmtLst.get(l + 1).toString();
+			asgnmtDataLst.add(temp_string);
+
+			// increments k for the number of elements in the array
+			k++;
+			l = l + 2;
+		}
+
+		JComboBox asgnmtMenu = new JComboBox(asgnmtDataLst.toArray());
+
+		addGrdPnl.add(asgnmtMenu);
+		addGrdPnl.add(stdntMenu);
+		addGrdPnl.add(grdLbl);
+		addGrdPnl.add(grdTxtFld);
+		addGrdPnl.add(sbmtGrdBtn);
+		addGrdPnl.add(backBtn);
+
+		sbmtGrdBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				String tempString = asgnmtMenu.getSelectedItem().toString();
+
+				int i = 0;
+				int assignmentID = 0;
+				String num = "";
+				String assignmentTitle = "";
+
+				while (i < tempString.length()) {
+					if (tempString.charAt(i) == ':') {
+						assignmentTitle = tempString.substring((i + 2), tempString.length());
+						break;
+					}
+
+					if (Character.isDigit(tempString.charAt(i))) {
+						while (Character.isDigit(tempString.charAt(i))) {
+							num = num + tempString.charAt(i);
+							i++;
+						}
+						continue;
+					}
+
+					i++;
+				}
+
+				assignmentID = Integer.parseInt(num);
+
+				String stdntName = stdntMenu.getSelectedItem().toString();
+				double stdntGrade = Double.parseDouble(grdTxtFld.getText());
+				conn.addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade);
+			}
+		});
+
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Grades"));
+		return addGrdPnl;
+	}
+
+	public JPanel bldEdtGrdPnl() {
+		JPanel edtGrdPnl = new JPanel();
+		JButton backBtn = new JButton("Back");
+		edtGrdPnl.add(backBtn);
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Grades"));
+		return edtGrdPnl;
 	}
 
 	public JPanel bldClsBhvrPnl() {
@@ -465,7 +571,7 @@ public class TeacherDash extends JFrame {
 			mdfyTblPnl.add(errLbl);
 			error_flag = -1;
 		}
-		
+
 		else if (error_flag == 5) {
 			JLabel rmvLbl = new JLabel("Table deleted successfully");
 			mdfyTblPnl.add(rmvLbl);
