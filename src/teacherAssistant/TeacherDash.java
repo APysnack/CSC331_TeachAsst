@@ -184,7 +184,15 @@ public class TeacherDash extends JFrame {
 			}
 		});
 
-		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
+		vwAtndBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel vwAtndPnl = bldVwAtndPnl();
+				scrnMgr.add(vwAtndPnl, "View Attendance");
+				cl.show(scrnMgr, "View Attendance");
+			}
+		});
+
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
 
 		return clsAtndPnl;
 	}
@@ -232,7 +240,7 @@ public class TeacherDash extends JFrame {
 			}
 		});
 
-		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
 
 		return rcrdAtndPnl;
 	}
@@ -527,8 +535,10 @@ public class TeacherDash extends JFrame {
 
 	public JPanel bldStdntGrdPnl() {
 		JPanel stdntGrdPnl = new JPanel();
+		
+		String override_query = "!select ID, tableID, grade from students;";
 
-		JTable table = conn.getJTable("Students");
+		JTable table = conn.getJTable(override_query);
 		JScrollPane dataScrollPane = new JScrollPane(table);
 
 		stdntGrdPnl.add(dataScrollPane);
@@ -816,6 +826,20 @@ public class TeacherDash extends JFrame {
 
 	public JPanel bldVwAtndPnl() {
 		JPanel vwAtndPnl = new JPanel();
+		JButton backBtn = new JButton("Back");
+
+		String override_query = "!select students.id, attendance.clsDate, attendance.isPresent, "
+				+ "students.absences from students inner join attendance on attendance.stdntID = students.id;";
+
+		JTable table = conn.getJTable(override_query);
+		JScrollPane scrollPane = new JScrollPane(table);
+		
+
+		vwAtndPnl.add(scrollPane);
+		vwAtndPnl.add(backBtn);
+		
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
+
 		return vwAtndPnl;
 	}
 

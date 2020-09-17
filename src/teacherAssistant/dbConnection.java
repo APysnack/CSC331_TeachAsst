@@ -12,6 +12,7 @@ import java.util.Vector;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 import com.mysql.cj.util.StringUtils;
 
@@ -157,7 +158,6 @@ public class dbConnection {
 
 			for (int i = 1; i <= colCount; i++) {
 				columnNames.addElement(metadata.getColumnName(i));
-
 			}
 
 			while (result.next()) {
@@ -169,7 +169,8 @@ public class dbConnection {
 				data.addElement(row);
 			}
 
-			JTable table = new JTable(data, columnNames) {
+			DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) {
+
 				public Class getColumnClass(int column) {
 					for (int row = 0; row < getRowCount(); row++) {
 						Object o = getValueAt(row, column);
@@ -177,10 +178,20 @@ public class dbConnection {
 							return o.getClass();
 						}
 					}
+
 					return Object.class;
+				}
+
+				@Override
+				public boolean isCellEditable(int row, int column) {
+					// all cells false
+					return false;
 				}
 			};
 
+			JTable table = new JTable();
+			table.setModel(tableModel);
+			
 			for (int i = 0; i < colCount; i++) {
 				table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 			}
@@ -568,7 +579,6 @@ public class dbConnection {
 
 	public void addAbsence(String studentID) {
 		String new_query = "update students set absences=(absences+1) where ID='" + studentID + "';";
-	
 
 		try {
 			Statement stmt = conn.createStatement();
