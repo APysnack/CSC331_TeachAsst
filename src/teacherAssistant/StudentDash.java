@@ -59,7 +59,7 @@ public class StudentDash extends JFrame {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// sets title of window
-		this.setTitle("User Login");
+		this.setTitle("Student Dashboard");
 
 		cl = new CardLayout();
 		scrnMgr = new JPanel(cl);

@@ -81,7 +81,7 @@ public class TeacherDash extends JFrame {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// sets title of window
-		this.setTitle("User Login");
+		this.setTitle("Teacher Dashboard");
 
 		cl = new CardLayout();
 		scrnMgr = new JPanel(cl);
@@ -204,10 +204,10 @@ public class TeacherDash extends JFrame {
 		JLabel lbl = new JLabel("Is the student present? Check if yes.");
 		JXDatePicker picker = new JXDatePicker();
 		picker.setDate(Calendar.getInstance().getTime());
-		picker.setFormats(new SimpleDateFormat("dd.MM.yyyy"));
+		picker.setFormats(new SimpleDateFormat("MM.dd.YYYY"));
 		picker.getUI();
 
-		ArrayList allStdnts = conn.getAllStdnts();
+		ArrayList allStdnts = conn.getAllNames("Students");
 		JPanel stndtPnl = new JPanel();
 		List<JCheckBox> chkBoxList = new ArrayList<>();
 		ButtonGroup grp = new ButtonGroup();
@@ -331,7 +331,7 @@ public class TeacherDash extends JFrame {
 		ArrayList asgnmtLst = conn.getAllAsgnmts();
 		List<String> asgnmtDataLst = new ArrayList<>();
 
-		ArrayList allStdnts = conn.getAllStdnts();
+		ArrayList allStdnts = conn.getAllNames("students");
 		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
 
 		JLabel lbl = new JLabel();
@@ -437,7 +437,7 @@ public class TeacherDash extends JFrame {
 		ArrayList asgnmtLst = conn.getAllAsgnmts();
 		List<String> asgnmtDataLst = new ArrayList<>();
 
-		ArrayList allStdnts = conn.getAllStdnts();
+		ArrayList allStdnts = conn.getAllNames("Students");
 		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
 
 		JLabel lbl = new JLabel();
@@ -535,7 +535,7 @@ public class TeacherDash extends JFrame {
 
 	public JPanel bldStdntGrdPnl() {
 		JPanel stdntGrdPnl = new JPanel();
-		
+
 		String override_query = "!select ID, tableID, grade from students;";
 
 		JTable table = conn.getJTable(override_query);
@@ -551,8 +551,52 @@ public class TeacherDash extends JFrame {
 
 	public JPanel bldClsBhvrPnl() {
 		JPanel clsBhvrPnl = new JPanel();
+
+		ArrayList allStdnts = conn.getAllNames("Students");
+		ArrayList bhvrEnums = conn.getEnumFields("behavior", "bhvrtype");
+
+		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
+		JComboBox bhvrTypes = new JComboBox(bhvrEnums.toArray());
+
+		JButton sbmtBtn = new JButton("Submit");
 		JButton backBtn = new JButton("Back");
+		
+		JTextArea comments = new JTextArea(5, 30);
+		comments.setEditable(true);
+		comments.setLineWrap(true);
+		JScrollPane commentPane = new JScrollPane(comments);
+		
+		JXDatePicker picker = new JXDatePicker();
+		picker.setDate(Calendar.getInstance().getTime());
+		picker.setFormats(new SimpleDateFormat("MM.dd.yyyy"));
+		picker.getUI();
+
+		JTable table = conn.getJTable("Behavior");
+		JScrollPane dataScrollPane = new JScrollPane(table);
+		
+		clsBhvrPnl.add(picker);
+		clsBhvrPnl.add(stdntMenu);
+		clsBhvrPnl.add(bhvrTypes);
+		clsBhvrPnl.add(commentPane);
+		clsBhvrPnl.add(sbmtBtn);
+		clsBhvrPnl.add(dataScrollPane);
 		clsBhvrPnl.add(backBtn);
+
+		sbmtBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				String selectedDate = dateFormat.format(picker.getDate());
+				String bhvrType = bhvrTypes.getSelectedItem().toString();
+				String stdntName = stdntMenu.getSelectedItem().toString();
+				String feedback = comments.getText();
+				
+				comments.setText("");
+				
+				error_flag = conn.logBehavior(stdntName, selectedDate, bhvrType, feedback);
+				
+			}
+		});
+
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
 		return clsBhvrPnl;
 	}
@@ -609,7 +653,7 @@ public class TeacherDash extends JFrame {
 		asgnStg.add(tblMenu);
 
 		// gets list of all students and all students at the selected table
-		ArrayList allStdnts = conn.getAllStdnts();
+		ArrayList allStdnts = conn.getAllNames("Students");
 		ArrayList tblStdnts = conn.getTblStdnts(selectTbl);
 		ArrayList unassignedStdnts = conn.getTblStdnts(0);
 
@@ -833,11 +877,10 @@ public class TeacherDash extends JFrame {
 
 		JTable table = conn.getJTable(override_query);
 		JScrollPane scrollPane = new JScrollPane(table);
-		
 
 		vwAtndPnl.add(scrollPane);
 		vwAtndPnl.add(backBtn);
-		
+
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
 
 		return vwAtndPnl;
@@ -860,7 +903,7 @@ public class TeacherDash extends JFrame {
 		JPanel dtlPanl = new JPanel(new GridLayout(2, 1, 0, 0));
 
 		JLabel asgnmtDtlLbl = new JLabel("Assignment Details");
-		JTextArea asgnmtDtlArea = new JTextArea(5, 20);
+		JTextArea asgnmtDtlArea = new JTextArea(15, 20);
 		asgnmtDtlArea.setEditable(true);
 		asgnmtDtlArea.setLineWrap(true);
 		JScrollPane dtlScrollPane = new JScrollPane(asgnmtDtlArea);

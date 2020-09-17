@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -30,6 +31,7 @@ public class dbConnection {
 	String password;
 	String url;
 	String query;
+	String emailDomain = "@hogwarts.com";
 	Connection conn;
 
 	dbConnection() {
@@ -64,12 +66,21 @@ public class dbConnection {
 
 	} // end function
 
-	public int createUser(String userName, String userPW, int Privilege) {
+	public int createUser(String userName, String userPW, int Privilege, String arg0) {
 		String new_query = "Insert into users values ('" + userName + "', '" + userPW + "', " + Privilege + ");";
 
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(new_query);
+
+			if (Privilege == 2) {
+				createTeacher(userName, arg0);
+			}
+
+			if (Privilege == 3) {
+				createStudent(userName, arg0);
+			}
+
 			return 0;
 		}
 
@@ -83,7 +94,62 @@ public class dbConnection {
 		}
 	}
 
-	public int editUser(String userName, String newName, String newPW, int newPriv) {
+	public int createStudent(String userName, String teacherName) {
+		String new_query = "insert into students values ('" + userName + "', '" + teacherName + "', 0, 0, 0);";
+
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.execute(new_query);
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		return 0;
+	}
+
+	public int createTeacher(String userName, String subject) {
+		String email = userName + emailDomain;
+		String new_query = "insert into teachers values ('" + userName + "', '" + email + "', '" + subject + "');";
+
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.execute(new_query);
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		return 0;
+	}
+
+	public int editUser(String userName, String newName, String newPW, int newPriv, String arg0) {
+		int oldPrivilege = getPrivilege(userName);
+
+		if (oldPrivilege != newPriv) {
+
+			if (oldPrivilege == 3) {
+				removeRow("students", newName);
+				if (newPriv == 2) {
+					createTeacher(newName, arg0);
+				}
+			}
+
+			else if (oldPrivilege == 2) {
+				removeRow("teachers", newName);
+				if (newPriv == 3) {
+					createStudent(newName, arg0);
+				}
+			}
+
+			else {
+				if (newPriv == 3) {
+					createStudent(newName, arg0);
+				}
+				if (newPriv == 2) {
+					createTeacher(newName, arg0);
+				}
+
+			}
+		}
 
 		String new_query = "update users set ID='" + newName + "', Password='" + newPW + "', Privilege=" + newPriv
 				+ " where ID='" + userName + "';";
@@ -107,6 +173,27 @@ public class dbConnection {
 			return 3;
 		}
 	} // end edit user function
+
+	public int getPrivilege(String userName) {
+		String new_query = "select privilege from Users where ID='" + userName + "';";
+		Statement stmt;
+		int i = 1;
+		int privilege = 0;
+
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(new_query);
+			if (rs.next()) {
+				privilege = rs.getInt(i);
+			}
+
+			return privilege;
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		return 0;
+	}
 
 	public int removeRow(String table, String id) {
 		String new_query = "Delete from " + table + " where ID='" + id + "';";
@@ -191,7 +278,7 @@ public class dbConnection {
 
 			JTable table = new JTable();
 			table.setModel(tableModel);
-			
+
 			for (int i = 0; i < colCount; i++) {
 				table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 			}
@@ -298,8 +385,8 @@ public class dbConnection {
 	}
 
 	// gets ID's of all students in the database
-	public ArrayList getAllStdnts() {
-		String new_query = "select * from students;";
+	public ArrayList getAllNames(String tableName) {
+		String new_query = "select * from " + tableName + ";";
 		ArrayList tblList = new ArrayList();
 
 		Statement stmt;
@@ -399,7 +486,7 @@ public class dbConnection {
 		// list: {tblName1, tblSize1, tblName2, tblSize2..}
 		List<Integer> tableContents = getClassTblSizes();
 
-		ArrayList studentNames = getAllStdnts();
+		ArrayList studentNames = getAllNames("students");
 		Collections.shuffle(studentNames);
 
 		int i = 0;
@@ -582,12 +669,63 @@ public class dbConnection {
 
 		try {
 			Statement stmt = conn.createStatement();
-			int rowsAffected = stmt.executeUpdate(new_query);
-			System.out.println(rowsAffected);
+			stmt.executeUpdate(new_query);
 			return;
 		} catch (SQLException e) {
 			return;
 		}
+	}
+
+	public ArrayList getEnumFields(String tableName, String fieldName) {
+		String new_query = "Show columns from " + tableName + " where field=?";
+		ArrayList numList = new ArrayList<>();
+		int i = 1;
+		String str = "";
+
+		try {
+			PreparedStatement stmt;
+			// uses a prepared statement to execute query
+			stmt = conn.prepareStatement(new_query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+			// sets first ? value in prepared statement to studentID.
+			stmt.setString(1, fieldName);
+			ResultSet result = stmt.executeQuery();
+			result.beforeFirst();
+			if (result.next()) {
+				str = result.getString(i + 1);
+				i++;
+			}
+
+			String[] enumVals = str.split("'");
+			for (i = 1; i < enumVals.length; i++) {
+				enumVals[i] = enumVals[i].replaceAll("[^A-Za-z0-9 \n]", "");
+				if (enumVals[i].length() > 0) {
+					numList.add(enumVals[i]);
+				}
+			}
+
+			return numList;
+
+		}
+
+		catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		return numList;
+	}
+
+	public int logBehavior(String name, String date, String type, String comment) {
+		String new_query = "insert into behavior values('" + name + "', '" + date + "', '" + type + "', '" + comment
+				+ "');";
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(new_query);
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		return 0;
 	}
 }
 // end class

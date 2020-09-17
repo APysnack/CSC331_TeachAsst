@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -35,7 +36,7 @@ public class AdminDash extends JFrame {
 	String[] usrTypes;
 
 	// ------------------------------------------------------------------------ //
-	// 								Main Window
+	// Main Window
 	// ------------------------------------------------------------------------ //
 
 	AdminDash(dbConnection conn) {
@@ -63,15 +64,15 @@ public class AdminDash extends JFrame {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// sets title of window
-		this.setTitle("User Login");
+		this.setTitle("Administrator Dashboard");
 
 		cl = new CardLayout();
 		scrnMgr = new JPanel(cl);
 
 		JPanel adminDash = bldAdminDash();
 
-		JPanel addUsrPnl = bldAddUsrPnl();
-		JPanel editUsrPnl = bldEditUsrPnl();
+		JPanel addUsrPnl = bldAddUsrPnl("Student");
+		JPanel editUsrPnl = bldEditUsrPnl("Student");
 		JPanel delUsrPnl = bldDelUsrPnl();
 		JPanel vwUsrPnl = bldVwUsrPnl();
 
@@ -123,14 +124,19 @@ public class AdminDash extends JFrame {
 		return adminDash;
 	}
 
-	public JPanel bldAddUsrPnl() {
+	public JPanel bldAddUsrPnl(String selectedUser) {
 		JPanel addUsrPnl = new JPanel();
+		ArrayList tchrArray = conn.getAllNames("teachers");
+		JComboBox tempComboBox = new JComboBox(tchrArray.toArray());
+		JTextField subjectFld = new JTextField("", 15);
+		JLabel lbl;
 
 		JComboBox usrMenu = new JComboBox(usrTypes);
-		usrMenu.setSelectedIndex(0);
+		usrMenu.setSelectedItem(selectedUser);
 
-		JLabel usrLbl = new JLabel("Create user name");
-		JLabel pwLbl = new JLabel("Create user password");
+		JLabel usrLbl = new JLabel("User Name");
+		JLabel pwLbl = new JLabel("User Password");
+		JLabel typeLbl = new JLabel("User Type");
 
 		JButton crtUsrBtn = new JButton("Register New User");
 		JButton backBtn = new JButton("Back");
@@ -138,12 +144,26 @@ public class AdminDash extends JFrame {
 		JTextField usrTextFld = new JTextField("", 15);
 		JTextField pwTextFld = new JTextField("", 15);
 
+		addUsrPnl.add(typeLbl);
+		addUsrPnl.add(usrMenu);
 		addUsrPnl.add(usrLbl);
 		addUsrPnl.add(usrTextFld);
 		addUsrPnl.add(pwLbl);
 		addUsrPnl.add(pwTextFld);
+
+		if (selectedUser == "Student") {
+			lbl = new JLabel("Choose a Teacher for this Student");
+			addUsrPnl.add(lbl);
+			addUsrPnl.add(tempComboBox);
+		}
+
+		if (selectedUser == "Teacher") {
+			lbl = new JLabel("Subject");
+			addUsrPnl.add(lbl);
+			addUsrPnl.add(subjectFld);
+		}
+
 		addUsrPnl.add(crtUsrBtn);
-		addUsrPnl.add(usrMenu);
 		addUsrPnl.add(backBtn);
 
 		if (error_flag == 3) {
@@ -168,32 +188,41 @@ public class AdminDash extends JFrame {
 
 		usrMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
+				String selectedUser = usrMenu.getSelectedItem().toString();
+				JPanel addUsrPnl = bldAddUsrPnl(selectedUser);
+				scrnMgr.add(addUsrPnl, "Add User");
+				cl.show(scrnMgr, "Add User");
+
 			}
 		});
 
 		crtUsrBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				int privilege = 0;
+				String arg0 = "";
 
 				if (usrMenu.getSelectedItem().equals("Student")) {
 					privilege = 3;
+					arg0 = tempComboBox.getSelectedItem().toString();
+
 				} else if (usrMenu.getSelectedItem().equals("Teacher")) {
 					privilege = 2;
+					arg0 = subjectFld.getSelectedText();
 				} else {
 					privilege = 1;
 				}
 
 				if (usrTextFld.getText().length() < 5 || pwTextFld.getText().length() < 5) {
 					error_flag = 3;
-					JPanel newUsrPnl = bldAddUsrPnl();
+					JPanel newUsrPnl = bldAddUsrPnl(selectedUser);
 					scrnMgr.add(newUsrPnl, "Add User");
 					cl.show(scrnMgr, "Add User");
 					return;
 				}
 
-				error_flag = conn.createUser(usrTextFld.getText(), pwTextFld.getText(), privilege);
+				error_flag = conn.createUser(usrTextFld.getText(), pwTextFld.getText(), privilege, arg0);
 
-				JPanel newUsrPnl = bldAddUsrPnl();
+				JPanel newUsrPnl = bldAddUsrPnl(selectedUser);
 				scrnMgr.add(newUsrPnl, "Add User");
 				cl.show(scrnMgr, "Add User");
 			}
@@ -204,9 +233,12 @@ public class AdminDash extends JFrame {
 		return addUsrPnl;
 	}
 
-	public JPanel bldEditUsrPnl() {
-
+	public JPanel bldEditUsrPnl(String selectedUser) {
 		JPanel editUsrPnl = new JPanel();
+		ArrayList tchrArray = conn.getAllNames("teachers");
+		JComboBox tempComboBox = new JComboBox(tchrArray.toArray());
+		JTextField subjectFld = new JTextField("", 15);
+		JLabel lbl;
 
 		JLabel oldIdLbl = new JLabel("Enter a User ID to Edit");
 		JTextField oldIdTxtBox = new JTextField("", 15);
@@ -220,7 +252,7 @@ public class AdminDash extends JFrame {
 		JButton backBtn = new JButton("Back");
 
 		JComboBox usrMenu = new JComboBox(usrTypes);
-		usrMenu.setSelectedIndex(0);
+		usrMenu.setSelectedItem(selectedUser);
 
 		editUsrPnl.add(oldIdLbl);
 		editUsrPnl.add(oldIdTxtBox);
@@ -230,6 +262,19 @@ public class AdminDash extends JFrame {
 		editUsrPnl.add(newPWTxtBox);
 		editUsrPnl.add(menuLbl);
 		editUsrPnl.add(usrMenu);
+
+		if (selectedUser == "Student") {
+			lbl = new JLabel("Choose a Teacher for this Student");
+			editUsrPnl.add(lbl);
+			editUsrPnl.add(tempComboBox);
+		}
+
+		if (selectedUser == "Teacher") {
+			lbl = new JLabel("Subject");
+			editUsrPnl.add(lbl);
+			editUsrPnl.add(subjectFld);
+		}
+
 		editUsrPnl.add(editSbmtBtn);
 		editUsrPnl.add(backBtn);
 
@@ -255,23 +300,37 @@ public class AdminDash extends JFrame {
 			editUsrPnl.add(tooShort);
 		}
 
+		usrMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String selectedUser = usrMenu.getSelectedItem().toString();
+				JPanel editUsrPnl = bldEditUsrPnl(selectedUser);
+				scrnMgr.add(editUsrPnl, "Add User");
+				cl.show(scrnMgr, "Add User");
+			}
+		});
+
 		editSbmtBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-
+				String arg0 = "";
 				int privilege = 0;
 
-				if (usrMenu.getSelectedItem().equals("Student")) {
+				String selectedUser = usrMenu.getSelectedItem().toString();
+
+				if (selectedUser.equals("Student")) {
 					privilege = 3;
-				} else if (usrMenu.getSelectedItem().equals("Teacher")) {
+					arg0 = tempComboBox.getSelectedItem().toString();
+				} else if (selectedUser.equals("Teacher")) {
 					privilege = 2;
+					arg0 = subjectFld.getText();
+
 				} else {
 					privilege = 1;
 				}
 
 				error_flag = conn.editUser(oldIdTxtBox.getText(), newIdTxtBox.getText(), newPWTxtBox.getText(),
-						privilege);
+						privilege, arg0);
 
-				JPanel editUsrPnl = bldEditUsrPnl();
+				JPanel editUsrPnl = bldEditUsrPnl(selectedUser);
 				scrnMgr.add(editUsrPnl, "Edit User");
 				cl.show(scrnMgr, "Edit User");
 			}
