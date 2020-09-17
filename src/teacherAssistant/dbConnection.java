@@ -131,14 +131,13 @@ public class dbConnection {
 	public JTable getJTable(String tbl) {
 
 		String new_query = "";
-		
+
 		char first_letter = tbl.charAt(0);
-		
-		// built so user can override the default query 
-		if(first_letter == '!') {
+
+		// built so user can override the default query
+		if (first_letter == '!') {
 			new_query = tbl.substring(1, tbl.length());
-		}
-		else {
+		} else {
 			new_query = "Select * from " + tbl + ";";
 		}
 
@@ -451,7 +450,6 @@ public class dbConnection {
 			try {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate(new_query);
-
 				updateGrade(stdntName);
 
 				return 0;
@@ -518,10 +516,10 @@ public class dbConnection {
 			double scoreSum = 0;
 			double ptsPossible = 0;
 			double total = 0.0;
-			
+
 			// uses a prepared statement to execute query
 			stmt = conn.prepareStatement(new_query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-			
+
 			// sets first ? value in prepared statement to studentID.
 			stmt.setString(1, studentID);
 			ResultSet result = stmt.executeQuery();
@@ -543,6 +541,43 @@ public class dbConnection {
 			System.out.println(e);
 		}
 		return 0;
+	}
+
+	public int recordAttendance(String studentID, String selectedDate, boolean is_present) {
+		String new_query = "insert into attendance values('" + studentID + "', '" + selectedDate + "', " + is_present
+				+ ");";
+
+		try {
+			Statement stmt = conn.createStatement();
+			int rowsAffected = stmt.executeUpdate(new_query);
+
+			if (is_present == false) {
+				addAbsence(studentID);
+			}
+
+			if (rowsAffected == 0) {
+				return 1;
+			} else {
+				return 0;
+			}
+		} catch (SQLException e) {
+			return 3;
+		}
+
+	}
+
+	public void addAbsence(String studentID) {
+		String new_query = "update students set absences=(absences+1) where ID='" + studentID + "';";
+	
+
+		try {
+			Statement stmt = conn.createStatement();
+			int rowsAffected = stmt.executeUpdate(new_query);
+			System.out.println(rowsAffected);
+			return;
+		} catch (SQLException e) {
+			return;
+		}
 	}
 }
 // end class

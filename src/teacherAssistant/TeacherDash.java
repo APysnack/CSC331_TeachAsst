@@ -17,12 +17,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,6 +38,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+
+import org.jdesktop.swingx.JXDatePicker;
 
 public class TeacherDash extends JFrame {
 
@@ -170,9 +176,65 @@ public class TeacherDash extends JFrame {
 			}
 		});
 
-		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
+		rcrdAtndBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel rcrdAtndPnl = bldRcrdAtndPnl();
+				scrnMgr.add(rcrdAtndPnl, "Record Attendance");
+				cl.show(scrnMgr, "Record Attendance");
+			}
+		});
+
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
 
 		return clsAtndPnl;
+	}
+
+	public JPanel bldRcrdAtndPnl() {
+		JPanel rcrdAtndPnl = new JPanel();
+		JButton sbmtBtn = new JButton("Submit");
+		JButton backBtn = new JButton("Back");
+		JLabel lbl = new JLabel("Is the student present? Check if yes.");
+		JXDatePicker picker = new JXDatePicker();
+		picker.setDate(Calendar.getInstance().getTime());
+		picker.setFormats(new SimpleDateFormat("dd.MM.yyyy"));
+		picker.getUI();
+
+		ArrayList allStdnts = conn.getAllStdnts();
+		JPanel stndtPnl = new JPanel();
+		List<JCheckBox> chkBoxList = new ArrayList<>();
+		ButtonGroup grp = new ButtonGroup();
+
+		rcrdAtndPnl.add(picker);
+
+		for (int i = 0; i < allStdnts.size(); i++) {
+			JCheckBox chkBox = new JCheckBox(allStdnts.get(i).toString());
+			chkBoxList.add(chkBox);
+			rcrdAtndPnl.add(chkBoxList.get(i));
+		}
+
+		rcrdAtndPnl.add(sbmtBtn);
+		rcrdAtndPnl.add(backBtn);
+
+		sbmtBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				String selectedDate = dateFormat.format(picker.getDate());
+
+				String name = "";
+				boolean is_present = false;
+
+				for (int i = 0; i < chkBoxList.size(); i++) {
+					name = chkBoxList.get(i).getText();
+					is_present = chkBoxList.get(i).isSelected();
+					error_flag = conn.recordAttendance(name, selectedDate, is_present);
+					error_flag = -1;
+				}
+			}
+		});
+
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Teacher Dashboard"));
+
+		return rcrdAtndPnl;
 	}
 
 	// ------------------------------------------------------------------------ //
@@ -393,12 +455,12 @@ public class TeacherDash extends JFrame {
 			k++;
 			l = l + 2;
 		}
-		
+
 		JComboBox asgnmtMenu = new JComboBox(asgnmtDataLst.toArray());
-		
+
 		String override_query = "!select grades.assignmentID, grades.assignmentTitle, grades.studentID, grades.grade, "
 				+ "assignments.points from grades inner join assignments on assignments.id = grades.assignmentID;";
-		
+
 		JTable table = conn.getJTable(override_query);
 		JScrollPane scrollPane = new JScrollPane(table);
 
@@ -750,11 +812,6 @@ public class TeacherDash extends JFrame {
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
 
 		return mdfyTblPnl;
-	}
-
-	public JPanel bldRcrdAtndPnl() {
-		JPanel rcrdAtndPnl = new JPanel();
-		return rcrdAtndPnl;
 	}
 
 	public JPanel bldVwAtndPnl() {

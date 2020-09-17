@@ -7,6 +7,9 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 
 public class MainApp {
 
@@ -14,6 +17,7 @@ public class MainApp {
 		LoginWindow login = new LoginWindow();
 		login.setSize(900, 550);
 		login.setVisible(true);
+
 	}
 
 }
