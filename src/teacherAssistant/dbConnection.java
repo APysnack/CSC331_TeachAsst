@@ -485,7 +485,7 @@ public class dbConnection {
 	}
 
 	public int addGrades(int assignmentID, String assignmentTitle, String stdntName, double stdntGrade, String mode) {
-		
+
 		String new_query = "";
 		System.out.println(new_query);
 
@@ -555,21 +555,41 @@ public class dbConnection {
 	public String getAssgnmtDtl(String idNum) {
 		String new_query = "Select details from assignments where ID =" + idNum + ";";
 		String details = "";
-		
+
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(new_query);
-			if(rs.next()) {
+			if (rs.next()) {
 				details = rs.getString(1);
 			}
 			return details;
-		}
-		catch(SQLException e) {
+		} catch (SQLException e) {
 			System.out.println(e);
 			return details;
 		}
 	}
-	
+
+	public int getAbsences(String studentID) {
+		int absCount = 0;
+		String new_query = "select absences from students where ID='" + studentID + "';";
+
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(new_query);
+
+			if (rs.next()) {
+				absCount = rs.getInt(1);
+				return absCount;
+			} else {
+				return absCount;
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e);
+			return -1;
+		}
+	}
+
 	public int updateGrade(String studentID) {
 
 		double grade = getGrade(studentID);

@@ -587,6 +587,7 @@ public class TeacherDash extends JFrame {
 		JTextArea comments = new JTextArea(5, 30);
 		comments.setEditable(true);
 		comments.setLineWrap(true);
+		comments.setWrapStyleWord(true);
 		JScrollPane commentPane = new JScrollPane(comments);
 
 		JXDatePicker picker = new JXDatePicker();
@@ -945,6 +946,7 @@ public class TeacherDash extends JFrame {
 		JTextArea asgnmtDtlArea = new JTextArea(15, 20);
 		asgnmtDtlArea.setEditable(true);
 		asgnmtDtlArea.setLineWrap(true);
+		asgnmtDtlArea.setWrapStyleWord(true);
 		JScrollPane dtlScrollPane = new JScrollPane(asgnmtDtlArea);
 
 		JPanel pad = new JPanel();

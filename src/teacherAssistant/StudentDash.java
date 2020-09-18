@@ -92,7 +92,7 @@ public class StudentDash extends JFrame {
 
 		JButton asgnmtBtn = new JButton("Assignments");
 		JButton grdBtn = new JButton("Grades");
-		JButton miscBtn = new JButton("Miscellaneous");
+		JButton miscBtn = new JButton("Other");
 		JButton lgOutBtn = new JButton("Log Out");
 
 		dshbrd.add(asgnmtBtn);
@@ -122,13 +122,17 @@ public class StudentDash extends JFrame {
 		String override_query = "!select * from grades where studentID = '" + userName + "';";
 
 		JTable grdTbl = conn.getJTable(override_query);
-
+		
 		if (grdTbl.getRowCount() == 0) {
-			JTextArea noGrades = new JTextArea(20, 20);
+			JTextArea noGrades = new JTextArea(20, 40);
 			Border border = BorderFactory.createLineBorder(Color.gray, 1);
 			noGrades.setBorder(border);
 			noGrades.setEditable(false);
-			noGrades.setText("There are no Grades to Display at the Moment. Please check back at another time");
+			noGrades.setLineWrap(true);
+			noGrades.setWrapStyleWord(true);
+			
+			noGrades.setText("As of now, this user has no grades to display. This is most likely because "
+					+ "no grades have been submitted for this user.\n\nPlease check back at another time");
 			grdPnl.add(noGrades);
 
 		} else {
@@ -139,6 +143,7 @@ public class StudentDash extends JFrame {
 		grdPnl.add(backBtn);
 
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Student Dashboard"));
+		
 
 		return grdPnl;
 	}
@@ -146,6 +151,35 @@ public class StudentDash extends JFrame {
 	public JPanel bldVwMiscPnl() {
 		JPanel miscPnl = new JPanel();
 		JButton backBtn = new JButton("Back");
+		JLabel lbl = new JLabel();
+		
+		String override_query = "!select * from behavior where stdntID='" + userName + "';";
+		
+		JTable bhvrTbl = conn.getJTable(override_query);
+
+		int absences = conn.getAbsences(userName);
+		String absString = "You currently have " + absences + " absences.";
+		lbl.setText(absString);
+		
+		miscPnl.add(lbl);
+		
+		if (bhvrTbl.getRowCount() == 0) {
+			JTextArea noBhvr = new JTextArea(20, 40);
+			Border border = BorderFactory.createLineBorder(Color.gray, 1);
+			noBhvr.setBorder(border);
+			noBhvr.setEditable(false);
+			noBhvr.setLineWrap(true);
+			noBhvr.setWrapStyleWord(true);
+			
+			noBhvr.setText("As of now, this user has no grades to display. This is most likely because "
+					+ "no grades have been submitted for this user.\n\nPlease check back at another time");
+			miscPnl.add(noBhvr);
+
+		} else {
+			JScrollPane bhvrScrollPane = new JScrollPane(bhvrTbl);
+			miscPnl.add(bhvrScrollPane);
+		}
+		
 
 		miscPnl.add(backBtn);
 
