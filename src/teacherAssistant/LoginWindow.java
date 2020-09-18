@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -22,10 +23,6 @@ import javax.swing.border.EmptyBorder;
 
 public class LoginWindow extends JFrame {
 
-	JButton lgnBtn, getPwBtn;
-	JLabel lgnLbl;
-	JTextField usrField, pwField;
-	JPanel currPanel;
 	CardLayout cl;
 	JPanel scrnMgr;
 	JPanel lgnPanel;
@@ -75,52 +72,15 @@ public class LoginWindow extends JFrame {
 
 		JPanel midPanel = new JPanel(new BorderLayout());
 
-		JPanel lgnWndw = new JPanel();
 		JPanel lgnPnl = new JPanel(new GridLayout(4, 1, 2, 2));
 
 		JButton lgnBtn = new JButton("Log In");
 		lgnPnl.add(lgnBtn);
 
-		lgnLbl = new JLabel("Please Enter your Login Information");
+		JLabel lgnLbl = new JLabel("Please Enter your Login Information");
 
-		usrField = new JTextField("Enter Username", 15);
-
-		// Needs to handle so that the user can enter text without clearing
-		usrField.addFocusListener(new FocusListener() {
-			// if user clicks on UserName field, it sets the text to empty for use to input
-			@Override
-			public void focusGained(FocusEvent e) {
-
-				if (usrField.getText().equals("Enter Username")) {
-					usrField.setText("");
-				}
-			}
-
-			// if user unclicks userName field it sets text to empty only if user hasnt
-			// typed
-			@Override
-			public void focusLost(FocusEvent e) {
-				if (usrField.getText().isEmpty()) {
-					usrField.setText("Enter Username");
-				}
-			}
-		});
-		pwField = new JTextField("Enter Password", 15);
-
-		pwField.addFocusListener(new FocusListener() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				if (pwField.getText().equals("Enter Password")) {
-					pwField.setText("");
-				}
-			}
-
-			public void focusLost(FocusEvent e) {
-				if (pwField.getText().isEmpty()) {
-					pwField.setText("Enter Password");
-				}
-			}
-		});
+		JTextField usrField = new JTextField("Enter Username", 15);
+		JPasswordField pwField = new JPasswordField("Enter Password", 15);
 
 		JPanel ctrLblPnl = new JPanel();
 		ctrLblPnl.add(lgnLbl);
@@ -134,15 +94,52 @@ public class LoginWindow extends JFrame {
 		midPanel.add(pad2, BorderLayout.EAST);
 		midPanel.add(pad3, BorderLayout.NORTH);
 		midPanel.add(pad4, BorderLayout.SOUTH);
-
 		mainPnl.add(midPanel, BorderLayout.CENTER);
+
+		// Needs to handle so that the user can enter text without clearing
+		usrField.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+
+				if (usrField.getText().equals("Enter Username")) {
+					usrField.setText("");
+				}
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				if (usrField.getText().isEmpty()) {
+					usrField.setText("Enter Username");
+				}
+			}
+
+		});
+
+		pwField.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				pwField.setEchoChar('*');
+				if (String.valueOf(pwField.getPassword()).equals("Enter Password")) {
+					pwField.setText("");
+				}
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				if (String.valueOf(pwField.getPassword()).equals("")) {
+					pwField.setText("Enter Password");
+					pwField.setEchoChar((char) 0);
+				}
+
+			}
+		});
 
 		lgnBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
 				String userName = usrField.getText();
 				String password = pwField.getText();
-				
+
 				int privilege = conn.connectUser(userName, password);
 
 				if (privilege == 1) {
