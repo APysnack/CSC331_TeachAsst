@@ -22,13 +22,8 @@ import javax.swing.border.EmptyBorder;
 
 public class StudentDash extends JFrame {
 
-	JButton lgnBtn, getPwBtn;
-	JLabel lgnLbl;
-	JTextField usrField, pwField;
-	JPanel currPanel;
 	CardLayout cl;
 	JPanel scrnMgr;
-	JPanel lgnPanel;
 	dbConnection conn;
 	int error_flag = -1;
 
@@ -64,22 +59,84 @@ public class StudentDash extends JFrame {
 		cl = new CardLayout();
 		scrnMgr = new JPanel(cl);
 
-		// code from the other dashboard to replicate
-//		JPanel tchrDash = buildTchrDash();
-//		
-//		JPanel clsAtndPnl = bldClsAtndPnl();
-//		JPanel clsAsgnmtPnl = bldClsAsgnmtPnl();
-//		JPanel clsGrdPnl = bldClsGrdPnl();
-//		JPanel clsBhvrPnl = bldClsBhvrPnl();
-//		
-//		scrnMgr.add(tchrDash, "Teacher Dashboard");
-//		scrnMgr.add(clsAtndPnl, "Attendance");
-//		scrnMgr.add(clsAsgnmtPnl, "Assignments");
-//		scrnMgr.add(clsGrdPnl, "Grades");
-//		scrnMgr.add(clsBhvrPnl, "Behavior");
+
+		JPanel stdntDash = bldStdntDash();
+		
+		JPanel vwAsgnmtPnl = bldVwAsgnmtPnl();
+		JPanel vwGrdPnl = bldVwGrdPnl();
+		JPanel vwMiscPnl = bldVwMiscPnl();
+		
+		scrnMgr.add(stdntDash, "Student Dashboard");
+		scrnMgr.add(vwAsgnmtPnl, "Assignments");
+		scrnMgr.add(vwGrdPnl, "Grades");
+		scrnMgr.add(vwMiscPnl, "Miscellaneous");
 
 		this.add(scrnMgr);
 
 		this.pack();
 	}
+	
+	public JPanel bldStdntDash() {
+		JPanel dshbrd = new JPanel();
+		
+		JButton asgnmtBtn = new JButton("Upcoming Assignments");
+		JButton grdBtn = new JButton("Grades");
+		JButton miscBtn = new JButton("Miscellaneous");
+		JButton lgOutBtn = new JButton("Log Out");
+		
+		dshbrd.add(asgnmtBtn);
+		dshbrd.add(grdBtn);
+		dshbrd.add(miscBtn);
+		dshbrd.add(lgOutBtn);
+		
+		
+		asgnmtBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
+		grdBtn.addActionListener(e -> cl.show(scrnMgr, "Grades"));
+		miscBtn.addActionListener(e -> cl.show(scrnMgr, "Miscellaneous"));
+		
+		lgOutBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+				LoginWindow login = new LoginWindow();
+				login.setVisible(true);
+				login.setSize(900, 550);
+			}
+		});
+		
+		return dshbrd;
+	}
+	
+	public JPanel bldVwGrdPnl() {
+		JPanel grdPnl = new JPanel();
+		JButton backBtn = new JButton("Back");
+		
+		grdPnl.add(backBtn);
+		
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Student Dashboard"));
+		
+		return grdPnl;
+	}
+	
+	public JPanel bldVwMiscPnl() {
+		JPanel miscPnl = new JPanel();
+		JButton backBtn = new JButton("Back");
+		
+		miscPnl.add(backBtn);
+		
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Student Dashboard"));
+		
+		return miscPnl;
+	}
+	
+	public JPanel bldVwAsgnmtPnl() {
+		JPanel asgnmtPnl = new JPanel();
+		JButton backBtn = new JButton("Back");
+		
+		asgnmtPnl.add(backBtn);
+		
+		backBtn.addActionListener(e -> cl.show(scrnMgr, "Student Dashboard"));
+		
+		return asgnmtPnl;
+	}
+	
 }
