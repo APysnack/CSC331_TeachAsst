@@ -162,6 +162,8 @@ public class TeacherDash extends JFrame {
 
 		asgnStgBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel asgnStgPnl = bldAsgnStgPnl(1);
 				scrnMgr.add(asgnStgPnl, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
@@ -170,6 +172,8 @@ public class TeacherDash extends JFrame {
 
 		mdfyTblBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel mdfyTblPnl = bldMdfyTblPnl();
 				scrnMgr.add(mdfyTblPnl, "Modify Table");
 				cl.show(scrnMgr, "Modify Table");
@@ -178,6 +182,8 @@ public class TeacherDash extends JFrame {
 
 		rcrdAtndBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel rcrdAtndPnl = bldRcrdAtndPnl();
 				scrnMgr.add(rcrdAtndPnl, "Record Attendance");
 				cl.show(scrnMgr, "Record Attendance");
@@ -186,6 +192,8 @@ public class TeacherDash extends JFrame {
 
 		vwAtndBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel vwAtndPnl = bldVwAtndPnl();
 				scrnMgr.add(vwAtndPnl, "View Attendance");
 				cl.show(scrnMgr, "View Attendance");
@@ -263,6 +271,8 @@ public class TeacherDash extends JFrame {
 
 		crtAsgnmtBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel crtAsgnmtPnl = bldCrtAsgnmtPnl();
 				scrnMgr.add(crtAsgnmtPnl, "Create Assignment");
 				cl.show(scrnMgr, "Create Assignment");
@@ -271,6 +281,8 @@ public class TeacherDash extends JFrame {
 
 		delAsgnmtBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel delAsgnmtPnl = bldDelAsgnmtPnl();
 				scrnMgr.add(delAsgnmtPnl, "Delete Assignment");
 				cl.show(scrnMgr, "Delete Assignment");
@@ -295,6 +307,8 @@ public class TeacherDash extends JFrame {
 
 		addGrdBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel addGrdPnl = bldAddGrdPnl();
 				scrnMgr.add(addGrdPnl, "Add Grade");
 				cl.show(scrnMgr, "Add Grade");
@@ -303,6 +317,8 @@ public class TeacherDash extends JFrame {
 
 		edtGrdBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel edtGrdPnl = bldEdtGrdPnl();
 				scrnMgr.add(edtGrdPnl, "Edit Grade");
 				cl.show(scrnMgr, "Edit Grade");
@@ -311,6 +327,8 @@ public class TeacherDash extends JFrame {
 
 		stdntGrdBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				repaint();
+				revalidate();
 				JPanel stdntGrdPnl = bldStdntGrdPnl();
 				scrnMgr.add(stdntGrdPnl, "Student Grades");
 				cl.show(scrnMgr, "Student Grades");
@@ -380,8 +398,8 @@ public class TeacherDash extends JFrame {
 
 		sbmtGrdBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				String tempString = asgnmtMenu.getSelectedItem().toString();
+				System.out.println(tempString);
 
 				int i = 0;
 				int assignmentID = 0;
@@ -409,6 +427,8 @@ public class TeacherDash extends JFrame {
 
 				String stdntName = stdntMenu.getSelectedItem().toString();
 
+				System.out.println(grdTxtFld.getText() + assignmentID + assignmentTitle + stdntName);
+
 				if (grdTxtFld.getText().matches("^[0-9]*\\.?[0-9]+$") && grdTxtFld.getText().length() > 0) {
 					double stdntGrade = Double.parseDouble(grdTxtFld.getText());
 					error_flag = conn.addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade, "Add");
@@ -417,6 +437,8 @@ public class TeacherDash extends JFrame {
 
 				}
 
+				repaint();
+				revalidate();
 				JPanel addGrdPnl = bldAddGrdPnl();
 				scrnMgr.add(addGrdPnl, "Add Grade");
 				cl.show(scrnMgr, "Add Grade");
@@ -523,6 +545,8 @@ public class TeacherDash extends JFrame {
 
 				}
 
+				repaint();
+				revalidate();
 				JPanel edtGrdPnl = bldEdtGrdPnl();
 				scrnMgr.add(edtGrdPnl, "Edit Grade");
 				cl.show(scrnMgr, "Edit Grade");
@@ -560,20 +584,21 @@ public class TeacherDash extends JFrame {
 
 		JButton sbmtBtn = new JButton("Submit");
 		JButton backBtn = new JButton("Back");
-		
+
 		JTextArea comments = new JTextArea(5, 30);
 		comments.setEditable(true);
 		comments.setLineWrap(true);
 		JScrollPane commentPane = new JScrollPane(comments);
-		
+
 		JXDatePicker picker = new JXDatePicker();
 		picker.setDate(Calendar.getInstance().getTime());
 		picker.setFormats(new SimpleDateFormat("MM.dd.yyyy"));
 		picker.getUI();
 
 		JTable table = conn.getJTable("Behavior");
+		table.setVisible(true);
 		JScrollPane dataScrollPane = new JScrollPane(table);
-		
+
 		clsBhvrPnl.add(picker);
 		clsBhvrPnl.add(stdntMenu);
 		clsBhvrPnl.add(bhvrTypes);
@@ -589,11 +614,16 @@ public class TeacherDash extends JFrame {
 				String bhvrType = bhvrTypes.getSelectedItem().toString();
 				String stdntName = stdntMenu.getSelectedItem().toString();
 				String feedback = comments.getText();
-				
+
 				comments.setText("");
-				
+
 				error_flag = conn.logBehavior(stdntName, selectedDate, bhvrType, feedback);
-				
+
+				repaint();
+				revalidate();
+				JPanel clsBhvrPnl = bldClsBhvrPnl();
+				scrnMgr.add(clsBhvrPnl, "Behavior");
+				cl.show(scrnMgr, "Behavior");
 			}
 		});
 
@@ -701,6 +731,8 @@ public class TeacherDash extends JFrame {
 				// Selected table is the currently selected table name
 				int selectedTbl = Integer.parseInt(str.replaceAll("[\\D]", ""));
 
+				repaint();
+				revalidate();
 				JPanel asgnStg = bldAsgnStgPnl(selectedTbl);
 				scrnMgr.add(asgnStg, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
@@ -729,6 +761,8 @@ public class TeacherDash extends JFrame {
 
 				conn.updateTableSeats(selectTbl, seatList);
 
+				repaint();
+				revalidate();
 				JPanel asgnStg = bldAsgnStgPnl(selectTbl);
 				scrnMgr.add(asgnStg, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
@@ -741,6 +775,8 @@ public class TeacherDash extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				conn.randomizeTables();
 
+				repaint();
+				revalidate();
 				JPanel asgnStg = bldAsgnStgPnl(selectTbl);
 				scrnMgr.add(asgnStg, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
@@ -835,6 +871,8 @@ public class TeacherDash extends JFrame {
 					error_flag = 4;
 				}
 
+				repaint();
+				revalidate();
 				JPanel mdfyTblPnl = bldMdfyTblPnl();
 				scrnMgr.add(mdfyTblPnl, "Modify Table");
 				cl.show(scrnMgr, "Modify Table");
@@ -857,6 +895,8 @@ public class TeacherDash extends JFrame {
 					error_flag = 5;
 				}
 
+				repaint();
+				revalidate();
 				JPanel mdfyTblPnl = bldMdfyTblPnl();
 				scrnMgr.add(mdfyTblPnl, "Modify Table");
 				cl.show(scrnMgr, "Modify Table");
@@ -983,6 +1023,8 @@ public class TeacherDash extends JFrame {
 
 				error_flag = conn.addAssignment(id, title, details, points, date);
 
+				repaint();
+				revalidate();
 				JPanel crtAsgnmtPnl = bldCrtAsgnmtPnl();
 				scrnMgr.add(crtAsgnmtPnl, "Create Assignment");
 				cl.show(scrnMgr, "Create Assignment");
@@ -1034,6 +1076,8 @@ public class TeacherDash extends JFrame {
 					error_flag = 4;
 				}
 
+				repaint();
+				revalidate();
 				JPanel delAsgnmtPnl = bldDelAsgnmtPnl();
 				scrnMgr.add(delAsgnmtPnl, "Delete Assignment");
 				cl.show(scrnMgr, "Delete Assignment");

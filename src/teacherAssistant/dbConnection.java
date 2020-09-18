@@ -123,7 +123,7 @@ public class dbConnection {
 
 	public int editUser(String userName, String newName, String newPW, int newPriv, String arg0) {
 		int flag = -1;
-		
+
 		flag = removeRow("Users", userName);
 		if (flag == 5) {
 			flag = createUser(newName, newPW, newPriv, arg0);
@@ -133,8 +133,10 @@ public class dbConnection {
 			} else {
 				return 3;
 			}
-		} else {
-			return 3;
+		}
+
+		else {
+			return 1;
 		}
 	} // end edit user function
 
@@ -483,7 +485,9 @@ public class dbConnection {
 	}
 
 	public int addGrades(int assignmentID, String assignmentTitle, String stdntName, double stdntGrade, String mode) {
+		
 		String new_query = "";
+		System.out.println(new_query);
 
 		if (mode.equalsIgnoreCase("Edit")) {
 			new_query = "delete from grades where assignmentID=" + assignmentID + " and studentID='" + stdntName + "';";

@@ -129,7 +129,8 @@ public class AdminDash extends JFrame {
 		JComboBox tchrComboBox = new JComboBox(tchrArray.toArray());
 		JComboBox sbjctComboBox = new JComboBox(subjectTypes);
 		JTextField subjectFld = new JTextField("", 15);
-		JLabel vrblLbl = new JLabel("test");
+		JLabel vrblLbl = new JLabel("");
+		JLabel lbl = new JLabel();
 
 		JComboBox typesMenu = new JComboBox(usrTypes);
 		typesMenu.setSelectedItem(selectedUser);
@@ -166,8 +167,7 @@ public class AdminDash extends JFrame {
 		addUsrPnl.add(crtUsrBtn);
 		addUsrPnl.add(backBtn);
 
-			lbl = check_errors("User");
-
+		lbl = check_errors("User");
 
 		addUsrPnl.add(lbl);
 
@@ -221,10 +221,11 @@ public class AdminDash extends JFrame {
 
 	public JPanel bldEditUsrPnl(String selectedUser) {
 		JPanel editUsrPnl = new JPanel();
+		JLabel edtLbl = new JLabel();
+		JLabel lbl = new JLabel();
 		ArrayList tchrArray = conn.getAllNames("teachers");
 		JComboBox tchrComboBoxEdt = new JComboBox(tchrArray.toArray());
 		JComboBox edtSbjctComboBox = new JComboBox(subjectTypes);
-		JLabel edtLbl;
 
 		JLabel oldIdLbl = new JLabel("Enter a User ID to Edit");
 		JTextField oldIdTxtBox = new JTextField("", 15);
@@ -265,6 +266,8 @@ public class AdminDash extends JFrame {
 		editUsrPnl.add(backBtn);
 
 		lbl = check_errors("User");
+		
+		editUsrPnl.add(lbl);
 
 		usrTypesEdt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -292,7 +295,15 @@ public class AdminDash extends JFrame {
 				} else {
 					privilege = 1;
 				}
-
+				
+				if (newIdTxtBox.getText().length() < 5 || newPWTxtBox.getText().length() < 5) {
+					error_flag = 3;
+					JPanel addUsrPnl = bldAddUsrPnl(selectedUser);
+					scrnMgr.add(addUsrPnl, "Edit User");
+					cl.show(scrnMgr, "Edit User");
+					return;
+				}
+				
 				error_flag = conn.editUser(oldIdTxtBox.getText(), newIdTxtBox.getText(), newPWTxtBox.getText(),
 						privilege, arg0);
 
@@ -334,6 +345,7 @@ public class AdminDash extends JFrame {
 		JTextField delUsrTxtBox = new JTextField("", 15);
 		JButton sbmtDelUsrBtn = new JButton("Delete User");
 		JButton backBtn = new JButton("Back");
+		JLabel lbl = new JLabel();
 
 		delUsrPnl.add(delUsrLbl);
 		delUsrPnl.add(delUsrId);
@@ -342,6 +354,8 @@ public class AdminDash extends JFrame {
 		delUsrPnl.add(backBtn);
 
 		lbl = check_errors("User");
+		
+		delUsrPnl.add(lbl);
 
 		sbmtDelUsrBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
