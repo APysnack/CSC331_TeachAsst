@@ -552,6 +552,24 @@ public class dbConnection {
 		}
 	}
 
+	public String getAssgnmtDtl(String idNum) {
+		String new_query = "Select details from assignments where ID =" + idNum + ";";
+		String details = "";
+		
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(new_query);
+			if(rs.next()) {
+				details = rs.getString(1);
+			}
+			return details;
+		}
+		catch(SQLException e) {
+			System.out.println(e);
+			return details;
+		}
+	}
+	
 	public int updateGrade(String studentID) {
 
 		double grade = getGrade(studentID);

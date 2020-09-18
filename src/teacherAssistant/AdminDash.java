@@ -28,7 +28,8 @@ public class AdminDash extends JFrame {
 	String[] subjectTypes = { "Alchemy", "Apparition", "Astronomy", "Care of Magical Creatures", "Charms",
 			"Defense Against the Dark Arts", "Divination", "Flying", "General Studies", "Herbology", "History of Magic",
 			"Muggle Studies", "Potions", "Transfiguration" };
-
+	
+	String userName;
 	int error_flag = -1;
 	JLabel lbl;
 	CardLayout cl;
@@ -39,8 +40,9 @@ public class AdminDash extends JFrame {
 	// Main Window
 	// ------------------------------------------------------------------------ //
 
-	AdminDash(dbConnection conn) {
+	AdminDash(dbConnection conn, String userName) {
 		this.conn = conn;
+		this.userName = userName;
 
 		this.setSize(900, 550);
 

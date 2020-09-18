@@ -42,7 +42,8 @@ import javax.swing.border.EmptyBorder;
 import org.jdesktop.swingx.JXDatePicker;
 
 public class TeacherDash extends JFrame {
-
+	
+	String userName;
 	JButton lgnBtn, getPwBtn;
 	JLabel lgnLbl;
 	JTextField usrField, pwField;
@@ -57,9 +58,10 @@ public class TeacherDash extends JFrame {
 	// Main Window
 	// ------------------------------------------------------------------------ //
 
-	TeacherDash(dbConnection conn) {
+	TeacherDash(dbConnection conn, String userName) {
 
 		this.conn = conn;
+		this.userName = userName;
 
 		this.setSize(900, 550);
 

@@ -9,11 +9,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -22,6 +29,7 @@ import javax.swing.border.EmptyBorder;
 
 public class StudentDash extends JFrame {
 
+	String userName;
 	CardLayout cl;
 	JPanel scrnMgr;
 	dbConnection conn;
@@ -31,8 +39,9 @@ public class StudentDash extends JFrame {
 	// Main Window
 	// ------------------------------------------------------------------------ //
 
-	StudentDash(dbConnection conn) {
+	StudentDash(dbConnection conn, String userName) {
 		this.conn = conn;
+		this.userName = userName;
 
 		this.setSize(900, 550);
 
@@ -59,13 +68,12 @@ public class StudentDash extends JFrame {
 		cl = new CardLayout();
 		scrnMgr = new JPanel(cl);
 
-
 		JPanel stdntDash = bldStdntDash();
-		
+
 		JPanel vwAsgnmtPnl = bldVwAsgnmtPnl();
 		JPanel vwGrdPnl = bldVwGrdPnl();
 		JPanel vwMiscPnl = bldVwMiscPnl();
-		
+
 		scrnMgr.add(stdntDash, "Student Dashboard");
 		scrnMgr.add(vwAsgnmtPnl, "Assignments");
 		scrnMgr.add(vwGrdPnl, "Grades");
@@ -75,25 +83,24 @@ public class StudentDash extends JFrame {
 
 		this.pack();
 	}
-	
+
 	public JPanel bldStdntDash() {
 		JPanel dshbrd = new JPanel();
-		
-		JButton asgnmtBtn = new JButton("Upcoming Assignments");
+
+		JButton asgnmtBtn = new JButton("Assignments");
 		JButton grdBtn = new JButton("Grades");
 		JButton miscBtn = new JButton("Miscellaneous");
 		JButton lgOutBtn = new JButton("Log Out");
-		
+
 		dshbrd.add(asgnmtBtn);
 		dshbrd.add(grdBtn);
 		dshbrd.add(miscBtn);
 		dshbrd.add(lgOutBtn);
-		
-		
+
 		asgnmtBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
 		grdBtn.addActionListener(e -> cl.show(scrnMgr, "Grades"));
 		miscBtn.addActionListener(e -> cl.show(scrnMgr, "Miscellaneous"));
-		
+
 		lgOutBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				dispose();
@@ -102,41 +109,108 @@ public class StudentDash extends JFrame {
 				login.setSize(900, 550);
 			}
 		});
-		
+
 		return dshbrd;
 	}
-	
+
 	public JPanel bldVwGrdPnl() {
 		JPanel grdPnl = new JPanel();
 		JButton backBtn = new JButton("Back");
-		
+
 		grdPnl.add(backBtn);
-		
+
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Student Dashboard"));
-		
+
 		return grdPnl;
 	}
-	
+
 	public JPanel bldVwMiscPnl() {
 		JPanel miscPnl = new JPanel();
 		JButton backBtn = new JButton("Back");
-		
+
 		miscPnl.add(backBtn);
-		
+
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Student Dashboard"));
-		
+
 		return miscPnl;
 	}
-	
+
 	public JPanel bldVwAsgnmtPnl() {
-		JPanel asgnmtPnl = new JPanel();
+		JPanel asgnmtPnl = new JPanel(new BorderLayout());
+
+		JPanel mainPnl = new JPanel(new GridLayout(2, 2, 5, 5));
+
 		JButton backBtn = new JButton("Back");
-		
-		asgnmtPnl.add(backBtn);
-		
+		JTable asgnmtTbl = conn.getJTable("Assignments");
+		JScrollPane asgnmtSP = new JScrollPane(asgnmtTbl);
+
+		JTextArea dtlArea = new JTextArea(28, 30);
+		dtlArea.setText("Select an assignment to view full details");
+		dtlArea.setLineWrap(true);
+		dtlArea.setEditable(false);
+
+		JPanel pad = new JPanel();
+		pad.setBorder(new EmptyBorder(10, 10, 10, 10));
+		JPanel pad2 = new JPanel();
+		pad2.setBorder(new EmptyBorder(10, 10, 10, 10));
+		JPanel pad3 = new JPanel();
+		pad2.setBorder(new EmptyBorder(10, 10, 10, 10));
+		JPanel pad4 = new JPanel();
+		pad2.setBorder(new EmptyBorder(20, 20, 20, 20));
+		JPanel pad5 = new JPanel();
+		pad2.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+		JPanel backBtnPnl = new JPanel(new GridLayout(3, 1, 0, 0));
+		backBtnPnl.add(backBtn);
+		backBtnPnl.add(pad3);
+		backBtnPnl.add(pad4);
+
+		mainPnl.add(asgnmtSP);
+		mainPnl.add(dtlArea);
+		mainPnl.add(pad5);
+		mainPnl.add(backBtnPnl);
+
+		asgnmtPnl.add(pad, BorderLayout.NORTH);
+		asgnmtPnl.add(mainPnl, BorderLayout.CENTER);
+		asgnmtPnl.add(pad2, BorderLayout.SOUTH);
+
+		asgnmtTbl.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+
+				asgnmtTbl.addMouseListener(new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						int row = asgnmtTbl.getSelectedRow();
+						String selectedID = asgnmtTbl.getValueAt(row, 0).toString();
+
+						String details = conn.getAssgnmtDtl(selectedID);
+						dtlArea.setText(details);
+					}
+				});
+
+				dtlArea.setVisible(true);
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+			}
+		});
+
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Student Dashboard"));
-		
+
 		return asgnmtPnl;
 	}
-	
+
+	private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {
+		JTable source = (JTable) evt.getSource();
+		int row = source.rowAtPoint(evt.getPoint());
+		int column = source.columnAtPoint(evt.getPoint());
+		String s = source.getModel().getValueAt(row, column) + "";
+
+		JOptionPane.showMessageDialog(null, s);
+		System.out.println("test");
+
+	}
+
 }

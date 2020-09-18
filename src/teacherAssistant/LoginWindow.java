@@ -146,24 +146,25 @@ public class LoginWindow extends JFrame {
 				int privilege = conn.connectUser(userName, password);
 
 				if (privilege == 1) {
-					dispose();
-					AdminDash adminDash = new AdminDash(conn);
+					AdminDash adminDash = new AdminDash(conn, userName);
 					adminDash.setVisible(true);
 					adminDash.setSize(900, 550);
+					dispose();
 				}
 
 				else if (privilege == 2) {
-					dispose();
-					TeacherDash tchrDash = new TeacherDash(conn);
+					TeacherDash tchrDash = new TeacherDash(conn, userName);
 					tchrDash.setVisible(true);
 					tchrDash.setSize(900, 550);
+					dispose();
 				}
 
 				else if (privilege == 3) {
 					dispose();
-					StudentDash stdntDash = new StudentDash(conn);
+					StudentDash stdntDash = new StudentDash(conn, userName);
 					stdntDash.setVisible(true);
 					stdntDash.setSize(900, 550);
+					dispose();
 				}
 
 				else {
