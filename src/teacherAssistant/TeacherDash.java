@@ -401,7 +401,6 @@ public class TeacherDash extends JFrame {
 		sbmtGrdBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String tempString = asgnmtMenu.getSelectedItem().toString();
-				System.out.println(tempString);
 
 				int i = 0;
 				int assignmentID = 0;
@@ -428,8 +427,6 @@ public class TeacherDash extends JFrame {
 				assignmentID = Integer.parseInt(num);
 
 				String stdntName = stdntMenu.getSelectedItem().toString();
-
-				System.out.println(grdTxtFld.getText() + assignmentID + assignmentTitle + stdntName);
 
 				if (grdTxtFld.getText().matches("^[0-9]*\\.?[0-9]+$") && grdTxtFld.getText().length() > 0) {
 					double stdntGrade = Double.parseDouble(grdTxtFld.getText());

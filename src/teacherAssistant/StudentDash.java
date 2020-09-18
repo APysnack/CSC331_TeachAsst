@@ -2,6 +2,7 @@ package teacherAssistant;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -14,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -25,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 public class StudentDash extends JFrame {
@@ -116,6 +119,22 @@ public class StudentDash extends JFrame {
 	public JPanel bldVwGrdPnl() {
 		JPanel grdPnl = new JPanel();
 		JButton backBtn = new JButton("Back");
+		String override_query = "!select * from grades where studentID = '" + userName + "';";
+
+		JTable grdTbl = conn.getJTable(override_query);
+
+		if (grdTbl.getRowCount() == 0) {
+			JTextArea noGrades = new JTextArea(20, 20);
+			Border border = BorderFactory.createLineBorder(Color.gray, 1);
+			noGrades.setBorder(border);
+			noGrades.setEditable(false);
+			noGrades.setText("There are no Grades to Display at the Moment. Please check back at another time");
+			grdPnl.add(noGrades);
+
+		} else {
+			JScrollPane grdScrollPane = new JScrollPane(grdTbl);
+			grdPnl.add(grdScrollPane);
+		}
 
 		grdPnl.add(backBtn);
 
@@ -145,6 +164,8 @@ public class StudentDash extends JFrame {
 		JScrollPane asgnmtSP = new JScrollPane(asgnmtTbl);
 
 		JTextArea dtlArea = new JTextArea(28, 30);
+		Border border = BorderFactory.createLineBorder(Color.gray, 1);
+		dtlArea.setBorder(border);
 		dtlArea.setText("Select an assignment to view full details");
 		dtlArea.setLineWrap(true);
 		dtlArea.setEditable(false);
@@ -200,17 +221,6 @@ public class StudentDash extends JFrame {
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Student Dashboard"));
 
 		return asgnmtPnl;
-	}
-
-	private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {
-		JTable source = (JTable) evt.getSource();
-		int row = source.rowAtPoint(evt.getPoint());
-		int column = source.columnAtPoint(evt.getPoint());
-		String s = source.getModel().getValueAt(row, column) + "";
-
-		JOptionPane.showMessageDialog(null, s);
-		System.out.println("test");
-
 	}
 
 }
