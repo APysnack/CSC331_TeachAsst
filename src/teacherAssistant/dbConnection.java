@@ -122,59 +122,24 @@ public class dbConnection {
 	}
 
 	public int editUser(String userName, String newName, String newPW, int newPriv, String arg0) {
-		int oldPrivilege = getPrivilege(userName);
+		int flag = -1;
+		
+		flag = removeRow("Users", userName);
+		if (flag == 5) {
+			flag = createUser(newName, newPW, newPriv, arg0);
 
-		if (oldPrivilege != newPriv) {
-
-			if (oldPrivilege == 3) {
-				removeRow("students", newName);
-				if (newPriv == 2) {
-					createTeacher(newName, arg0);
-				}
-			}
-
-			else if (oldPrivilege == 2) {
-				removeRow("teachers", newName);
-				if (newPriv == 3) {
-					createStudent(newName, arg0);
-				}
-			}
-
-			else {
-				if (newPriv == 3) {
-					createStudent(newName, arg0);
-				}
-				if (newPriv == 2) {
-					createTeacher(newName, arg0);
-				}
-
-			}
-		}
-
-		String new_query = "update users set ID='" + newName + "', Password='" + newPW + "', Privilege=" + newPriv
-				+ " where ID='" + userName + "';";
-
-		try {
-			Statement stmt = conn.createStatement();
-			int rowsAffected = stmt.executeUpdate(new_query);
-			if (rowsAffected == 0) {
-				return 1;
-			} else {
+			if (flag == 0) {
 				return 6;
+			} else {
+				return 3;
 			}
-		}
-
-		catch (SQLIntegrityConstraintViolationException e) {
-			return 2;
-		}
-
-		catch (SQLException e) {
-			System.out.println(e);
+		} else {
 			return 3;
 		}
 	} // end edit user function
 
 	public int getPrivilege(String userName) {
+
 		String new_query = "select privilege from Users where ID='" + userName + "';";
 		Statement stmt;
 		int i = 1;

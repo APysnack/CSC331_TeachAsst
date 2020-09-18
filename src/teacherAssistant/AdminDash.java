@@ -24,24 +24,22 @@ import javax.swing.border.EmptyBorder;
 
 public class AdminDash extends JFrame {
 
-	JButton lgnBtn, getPwBtn;
-	JLabel lgnLbl;
-	JTextField usrField, pwField;
-	JPanel currPanel;
+	String[] usrTypes = { "Student", "Teacher", "Admin" };
+	String[] subjectTypes = { "Alchemy", "Apparition", "Astronomy", "Care of Magical Creatures", "Charms",
+			"Defense Against the Dark Arts", "Divination", "Flying", "General Studies", "Herbology", "History of Magic",
+			"Muggle Studies", "Potions", "Transfiguration" };
+
+	int error_flag = -1;
+	JLabel lbl;
 	CardLayout cl;
 	JPanel scrnMgr;
-	JPanel lgnPanel;
 	dbConnection conn;
-	int error_flag = -1;
-	String[] usrTypes;
 
 	// ------------------------------------------------------------------------ //
 	// Main Window
 	// ------------------------------------------------------------------------ //
 
 	AdminDash(dbConnection conn) {
-		String[] usrTypes = { "Student", "Teacher", "Admin" };
-		this.usrTypes = usrTypes;
 		this.conn = conn;
 
 		this.setSize(900, 550);
@@ -105,14 +103,6 @@ public class AdminDash extends JFrame {
 		editUsrBtn.addActionListener(e -> cl.show(scrnMgr, "Edit User"));
 		delUsrBtn.addActionListener(e -> cl.show(scrnMgr, "Delete User"));
 
-		vwUsrBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JPanel vwUsrPnl = bldVwUsrPnl();
-				scrnMgr.add(vwUsrPnl, "View User");
-				cl.show(scrnMgr, "View User");
-			}
-		});
-
 		lgOutBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				dispose();
@@ -121,18 +111,28 @@ public class AdminDash extends JFrame {
 				login.setSize(900, 550);
 			}
 		});
+
+		vwUsrBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel vwUsrPnl = bldVwUsrPnl();
+				scrnMgr.add(vwUsrPnl, "View User");
+				cl.show(scrnMgr, "View User");
+			}
+		});
+
 		return adminDash;
 	}
 
 	public JPanel bldAddUsrPnl(String selectedUser) {
 		JPanel addUsrPnl = new JPanel();
 		ArrayList tchrArray = conn.getAllNames("teachers");
-		JComboBox tempComboBox = new JComboBox(tchrArray.toArray());
+		JComboBox tchrComboBox = new JComboBox(tchrArray.toArray());
+		JComboBox sbjctComboBox = new JComboBox(subjectTypes);
 		JTextField subjectFld = new JTextField("", 15);
-		JLabel lbl;
+		JLabel vrblLbl = new JLabel("test");
 
-		JComboBox usrMenu = new JComboBox(usrTypes);
-		usrMenu.setSelectedItem(selectedUser);
+		JComboBox typesMenu = new JComboBox(usrTypes);
+		typesMenu.setSelectedItem(selectedUser);
 
 		JLabel usrLbl = new JLabel("User Name");
 		JLabel pwLbl = new JLabel("User Password");
@@ -141,89 +141,75 @@ public class AdminDash extends JFrame {
 		JButton crtUsrBtn = new JButton("Register New User");
 		JButton backBtn = new JButton("Back");
 
-		JTextField usrTextFld = new JTextField("", 15);
-		JTextField pwTextFld = new JTextField("", 15);
+		JTextField usrNmTxtFld = new JTextField("", 15);
+		JTextField usrPwTxtFld = new JTextField("", 15);
 
 		addUsrPnl.add(typeLbl);
-		addUsrPnl.add(usrMenu);
+		addUsrPnl.add(typesMenu);
 		addUsrPnl.add(usrLbl);
-		addUsrPnl.add(usrTextFld);
+		addUsrPnl.add(usrNmTxtFld);
 		addUsrPnl.add(pwLbl);
-		addUsrPnl.add(pwTextFld);
+		addUsrPnl.add(usrPwTxtFld);
 
 		if (selectedUser == "Student") {
-			lbl = new JLabel("Choose a Teacher for this Student");
-			addUsrPnl.add(lbl);
-			addUsrPnl.add(tempComboBox);
+			vrblLbl = new JLabel("Choose a Teacher for this Student");
+			addUsrPnl.add(vrblLbl);
+			addUsrPnl.add(tchrComboBox);
 		}
 
 		if (selectedUser == "Teacher") {
-			lbl = new JLabel("Subject");
-			addUsrPnl.add(lbl);
-			addUsrPnl.add(subjectFld);
+			vrblLbl = new JLabel("Subject");
+			addUsrPnl.add(vrblLbl);
+			addUsrPnl.add(sbjctComboBox);
 		}
 
 		addUsrPnl.add(crtUsrBtn);
 		addUsrPnl.add(backBtn);
 
-		if (error_flag == 3) {
-			JLabel tooShort = new JLabel("Usernames and Passwords must be at least 5 Characters Long");
-			addUsrPnl.add(tooShort);
-			error_flag = -1;
-		}
+			lbl = check_errors("User");
 
-		if (error_flag == 0) {
-			JLabel success = new JLabel("User successfully added");
-			addUsrPnl.add(success);
-			error_flag = -1;
-		}
 
-		if (error_flag == 2) {
-			JLabel nameTaken = new JLabel("ERROR: \n" + "That name is already registered to another user \n"
-					+ "Please try a different Username");
-			addUsrPnl.add(nameTaken);
-			error_flag = -1;
+		addUsrPnl.add(lbl);
 
-		}
-
-		usrMenu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				String selectedUser = usrMenu.getSelectedItem().toString();
-				JPanel addUsrPnl = bldAddUsrPnl(selectedUser);
+		typesMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String selectedType = typesMenu.getSelectedItem().toString();
+				JPanel addUsrPnl = bldAddUsrPnl(selectedType);
 				scrnMgr.add(addUsrPnl, "Add User");
 				cl.show(scrnMgr, "Add User");
-
 			}
 		});
 
 		crtUsrBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
+			public void actionPerformed(ActionEvent e) {
 				int privilege = 0;
 				String arg0 = "";
+				String usrName = usrNmTxtFld.getText();
+				String usrPW = usrPwTxtFld.getText();
 
-				if (usrMenu.getSelectedItem().equals("Student")) {
+				if (typesMenu.getSelectedItem().equals("Student")) {
 					privilege = 3;
-					arg0 = tempComboBox.getSelectedItem().toString();
+					arg0 = tchrComboBox.getSelectedItem().toString();
 
-				} else if (usrMenu.getSelectedItem().equals("Teacher")) {
+				} else if (typesMenu.getSelectedItem().equals("Teacher")) {
 					privilege = 2;
-					arg0 = subjectFld.getSelectedText();
+					arg0 = sbjctComboBox.getSelectedItem().toString();
 				} else {
 					privilege = 1;
 				}
 
-				if (usrTextFld.getText().length() < 5 || pwTextFld.getText().length() < 5) {
+				if (usrName.length() < 5 || usrPW.length() < 5) {
 					error_flag = 3;
-					JPanel newUsrPnl = bldAddUsrPnl(selectedUser);
-					scrnMgr.add(newUsrPnl, "Add User");
+					JPanel addUsrPnl = bldAddUsrPnl(selectedUser);
+					scrnMgr.add(addUsrPnl, "Add User");
 					cl.show(scrnMgr, "Add User");
 					return;
 				}
 
-				error_flag = conn.createUser(usrTextFld.getText(), pwTextFld.getText(), privilege, arg0);
+				error_flag = conn.createUser(usrName, usrPW, privilege, arg0);
 
-				JPanel newUsrPnl = bldAddUsrPnl(selectedUser);
-				scrnMgr.add(newUsrPnl, "Add User");
+				JPanel addUsrPnl = bldAddUsrPnl(selectedUser);
+				scrnMgr.add(addUsrPnl, "Add User");
 				cl.show(scrnMgr, "Add User");
 			}
 		});
@@ -236,9 +222,9 @@ public class AdminDash extends JFrame {
 	public JPanel bldEditUsrPnl(String selectedUser) {
 		JPanel editUsrPnl = new JPanel();
 		ArrayList tchrArray = conn.getAllNames("teachers");
-		JComboBox tempComboBox = new JComboBox(tchrArray.toArray());
-		JTextField subjectFld = new JTextField("", 15);
-		JLabel lbl;
+		JComboBox tchrComboBoxEdt = new JComboBox(tchrArray.toArray());
+		JComboBox edtSbjctComboBox = new JComboBox(subjectTypes);
+		JLabel edtLbl;
 
 		JLabel oldIdLbl = new JLabel("Enter a User ID to Edit");
 		JTextField oldIdTxtBox = new JTextField("", 15);
@@ -251,8 +237,8 @@ public class AdminDash extends JFrame {
 		JButton editSbmtBtn = new JButton("Submit");
 		JButton backBtn = new JButton("Back");
 
-		JComboBox usrMenu = new JComboBox(usrTypes);
-		usrMenu.setSelectedItem(selectedUser);
+		JComboBox usrTypesEdt = new JComboBox(usrTypes);
+		usrTypesEdt.setSelectedItem(selectedUser);
 
 		editUsrPnl.add(oldIdLbl);
 		editUsrPnl.add(oldIdTxtBox);
@@ -261,51 +247,31 @@ public class AdminDash extends JFrame {
 		editUsrPnl.add(newPWLbl);
 		editUsrPnl.add(newPWTxtBox);
 		editUsrPnl.add(menuLbl);
-		editUsrPnl.add(usrMenu);
+		editUsrPnl.add(usrTypesEdt);
 
 		if (selectedUser == "Student") {
-			lbl = new JLabel("Choose a Teacher for this Student");
-			editUsrPnl.add(lbl);
-			editUsrPnl.add(tempComboBox);
+			edtLbl = new JLabel("Choose a Teacher for this Student");
+			editUsrPnl.add(edtLbl);
+			editUsrPnl.add(tchrComboBoxEdt);
 		}
 
 		if (selectedUser == "Teacher") {
-			lbl = new JLabel("Subject");
-			editUsrPnl.add(lbl);
-			editUsrPnl.add(subjectFld);
+			edtLbl = new JLabel("Subject");
+			editUsrPnl.add(edtLbl);
+			editUsrPnl.add(edtSbjctComboBox);
 		}
 
 		editUsrPnl.add(editSbmtBtn);
 		editUsrPnl.add(backBtn);
 
-		if (error_flag == 0) {
-			JLabel success = new JLabel("User successfully edited");
-			editUsrPnl.add(success);
-		}
+		lbl = check_errors("User");
 
-		if (error_flag == 1) {
-			JLabel usrDNE = new JLabel("This user does not exist");
-			editUsrPnl.add(usrDNE);
-		}
-
-		if (error_flag == 2) {
-			JLabel nameTaken = new JLabel("ERROR: \n" + "That name is already registered to another user \n"
-					+ "Please try a different Username");
-			editUsrPnl.add(nameTaken);
-
-		}
-
-		if (error_flag == 3) {
-			JLabel tooShort = new JLabel("ERROR: \n" + "Please ensure your name and password are a minimum of 5 chars");
-			editUsrPnl.add(tooShort);
-		}
-
-		usrMenu.addActionListener(new ActionListener() {
+		usrTypesEdt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String selectedUser = usrMenu.getSelectedItem().toString();
+				String selectedUser = usrTypesEdt.getSelectedItem().toString();
 				JPanel editUsrPnl = bldEditUsrPnl(selectedUser);
-				scrnMgr.add(editUsrPnl, "Add User");
-				cl.show(scrnMgr, "Add User");
+				scrnMgr.add(editUsrPnl, "Edit User");
+				cl.show(scrnMgr, "Edit User");
 			}
 		});
 
@@ -314,14 +280,14 @@ public class AdminDash extends JFrame {
 				String arg0 = "";
 				int privilege = 0;
 
-				String selectedUser = usrMenu.getSelectedItem().toString();
+				String selectedUser = usrTypesEdt.getSelectedItem().toString();
 
 				if (selectedUser.equals("Student")) {
 					privilege = 3;
-					arg0 = tempComboBox.getSelectedItem().toString();
+					arg0 = tchrComboBoxEdt.getSelectedItem().toString();
 				} else if (selectedUser.equals("Teacher")) {
 					privilege = 2;
-					arg0 = subjectFld.getText();
+					arg0 = edtSbjctComboBox.getSelectedItem().toString();
 
 				} else {
 					privilege = 1;
@@ -356,9 +322,6 @@ public class AdminDash extends JFrame {
 		vwUsrPnl.add(pad);
 		vwUsrPnl.add(backBtn);
 
-		vwUsrPnl.repaint();
-		vwUsrPnl.revalidate();
-
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Admin Dashboard"));
 		return vwUsrPnl;
 	}
@@ -366,32 +329,23 @@ public class AdminDash extends JFrame {
 	public JPanel bldDelUsrPnl() {
 
 		JPanel delUsrPnl = new JPanel();
-		JLabel delUsrHdr = new JLabel("Warning: Deleting a user cannot be undone");
+		JLabel delUsrLbl = new JLabel("Warning: Deleting a user cannot be undone");
 		JLabel delUsrId = new JLabel("Enter User ID");
-		JTextField usrIdTxtBox = new JTextField("", 15);
-		JButton delUsrBtn = new JButton("Delete User");
-
+		JTextField delUsrTxtBox = new JTextField("", 15);
+		JButton sbmtDelUsrBtn = new JButton("Delete User");
 		JButton backBtn = new JButton("Back");
 
-		delUsrPnl.add(delUsrHdr);
+		delUsrPnl.add(delUsrLbl);
 		delUsrPnl.add(delUsrId);
-		delUsrPnl.add(usrIdTxtBox);
-		delUsrPnl.add(delUsrBtn);
+		delUsrPnl.add(delUsrTxtBox);
+		delUsrPnl.add(sbmtDelUsrBtn);
 		delUsrPnl.add(backBtn);
 
-		if (error_flag == 0) {
-			JLabel success = new JLabel("User successfully removed");
-			delUsrPnl.add(success);
-		}
+		lbl = check_errors("User");
 
-		if (error_flag == 1) {
-			JLabel usrDNE = new JLabel("This user does not exist");
-			delUsrPnl.add(usrDNE);
-		}
-
-		delUsrBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				error_flag = conn.removeRow("Users", usrIdTxtBox.getText());
+		sbmtDelUsrBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				error_flag = conn.removeRow("Users", delUsrTxtBox.getText());
 				JPanel delUsrPnl = bldDelUsrPnl();
 				scrnMgr.add(delUsrPnl, "Delete User");
 				cl.show(scrnMgr, "Delete User");
@@ -401,6 +355,46 @@ public class AdminDash extends JFrame {
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Admin Dashboard"));
 
 		return delUsrPnl;
+	} // end
+
+	public JLabel check_errors(String vrbl) {
+		JLabel msg = new JLabel();
+
+		if (error_flag == 0) {
+			msg.setText(vrbl + " added successfully");
+		}
+
+		else if (error_flag == 1) {
+			msg.setText("ERROR: " + vrbl + " ID not found");
+		}
+
+		else if (error_flag == 2) {
+			msg.setText("ERROR: " + vrbl + " is a duplicate of another " + vrbl);
+		}
+		
+		else if (error_flag == 3) {
+			msg.setText("ERROR: Usernames/Passwords must be at least 5 chars");
+		}
+
+		else if (error_flag == 4) {
+			msg.setText("ERROR: " + "There was an unknown error with your request");
+		}
+
+		else if (error_flag == 5) {
+			msg.setText(vrbl + " deleted successfully");
+		}
+
+		else if (error_flag == 6) {
+			msg.setText(vrbl + " updated successfully");
+		}
+
+		else {
+			msg.setText("");
+		}
+
+		error_flag = -1;
+
+		return msg;
 	}
 
 }
