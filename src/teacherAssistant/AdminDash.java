@@ -126,6 +126,7 @@ public class AdminDash extends JFrame {
 
 	public JPanel bldAddUsrPnl(String selectedUser) {
 		JPanel addUsrPnl = new JPanel();
+		conn.setTrueAll(true);
 		ArrayList tchrArray = conn.getAllNames("teachers");
 		JComboBox tchrComboBox = new JComboBox(tchrArray.toArray());
 		JComboBox sbjctComboBox = new JComboBox(subjectTypes);
@@ -224,6 +225,7 @@ public class AdminDash extends JFrame {
 		JPanel editUsrPnl = new JPanel();
 		JLabel edtLbl = new JLabel();
 		JLabel lbl = new JLabel();
+		conn.setTrueAll(true);
 		ArrayList tchrArray = conn.getAllNames("teachers");
 		JComboBox tchrComboBoxEdt = new JComboBox(tchrArray.toArray());
 		JComboBox edtSbjctComboBox = new JComboBox(subjectTypes);
@@ -323,7 +325,7 @@ public class AdminDash extends JFrame {
 		JPanel vwUsrPnl = new JPanel(new GridLayout(3, 1, 2, 2));
 
 		JButton backBtn = new JButton("Back");
-
+		conn.setTrueAll(true);
 		JTable table = conn.getJTable("users");
 		JScrollPane scrollPane = new JScrollPane(table);
 

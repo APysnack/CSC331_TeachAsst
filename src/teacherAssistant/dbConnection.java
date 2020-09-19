@@ -27,6 +27,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 //	4: function specific, 5: delete success, 6: edit success]
 
 public class dbConnection {
+	boolean trueAll = false;
 	String usrName;
 	String name;
 	String password;
@@ -185,7 +186,7 @@ public class dbConnection {
 	} // end remove user function
 
 	public JTable getJTable(String tbl) {
-
+		
 		String new_query = "";
 
 		char first_letter = tbl.charAt(0);
@@ -193,8 +194,13 @@ public class dbConnection {
 		// built so user can override the default query
 		if (first_letter == '!') {
 			new_query = tbl.substring(1, tbl.length());
-		} else {
+		} 
+		else if (trueAll == true) {
 			new_query = "Select * from " + tbl + ";";
+			resetTrueAll();
+		} 
+		else {
+			new_query = "Select * from " + tbl + " where teacherID='" + usrName + "';";
 		}
 
 		try {
@@ -263,7 +269,7 @@ public class dbConnection {
 
 	public int addAssignment(String id, String title, String details, String points, String dueDate) {
 		String new_query = "insert into assignments values (" + id + ", '" + title + "', '" + details + "', " + points
-				+ ", '" + dueDate + "');";
+				+ ", '" + dueDate + "', '" + usrName + "');";
 
 		if (!StringUtils.isStrictlyNumeric(id) || !StringUtils.isStrictlyNumeric(points) || dueDate.length() < 10) {
 			return 4;
@@ -288,7 +294,7 @@ public class dbConnection {
 
 	// gets the size of an individual table (arg0)
 	public int getClassTblSize(int tblNum) {
-		String new_query = "select size from class_tables where ID=" + tblNum + ";";
+		String new_query = "select size from class_tables where ID=" + tblNum + " and teacherID='" + usrName + "';";
 		int size = 0;
 		try {
 			Statement stmt = conn.createStatement();
@@ -308,7 +314,7 @@ public class dbConnection {
 	// gets the names/sizes of each table and stores in list {tblName1, tblSize1,
 	// tblName2, tblSize2..}
 	public List<Integer> getClassTblSizes() {
-		String new_query = "select id, size from class_tables;";
+		String new_query = "select id, size from class_tables where teacherID='" + usrName + "';";
 
 		List<Integer> tblSizes = new ArrayList<>();
 
@@ -330,7 +336,7 @@ public class dbConnection {
 
 	// gets all students that are assigned to table arg0
 	public ArrayList getTblStdnts(int tblNum) {
-		String new_query = "select * from students where tableID=" + tblNum + ";";
+		String new_query = "select * from students where tableID=" + tblNum + " and teacherID='" + usrName + "';";
 		ArrayList tblList = new ArrayList();
 
 		Statement stmt;
@@ -354,7 +360,13 @@ public class dbConnection {
 
 	// gets ID's of all students in the database
 	public ArrayList getAllNames(String tableName) {
-		String new_query = "select * from " + tableName + ";";
+		String new_query = "select * from " + tableName + " where teacherID='" + usrName + "';";
+
+		if (trueAll == true) {
+			new_query = "select * from " + tableName + ";";
+			resetTrueAll();
+		}
+
 		ArrayList tblList = new ArrayList();
 
 		Statement stmt;
@@ -378,7 +390,8 @@ public class dbConnection {
 
 	// takes a list of names and assigns them all to the table in arg0
 	public int updateTableSeats(int tableID, List<String> seatList) {
-		String resetTable = "update students set tableID=0 where tableID=" + tableID + ";";
+		String resetTable = "update students set tableID=0 where tableID=" + tableID + " and teacherID='" + usrName
+				+ "';";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -391,7 +404,8 @@ public class dbConnection {
 
 		for (int i = 0; i < seatList.size(); i++) {
 			String name = seatList.get(i);
-			String addName = "update students set tableID=" + tableID + " where ID='" + name + "';";
+			String addName = "update students set tableID=" + tableID + " where ID='" + name + "' and teacherID='"
+					+ usrName + "';";
 
 			try {
 				Statement stmt = conn.createStatement();
@@ -407,7 +421,7 @@ public class dbConnection {
 	}
 
 	public int addClsTbl(int tblID, int tblSize) {
-		String new_query = "insert into class_tables values(" + tblID + "," + tblSize + ");";
+		String new_query = "insert into class_tables values(" + tblID + "," + tblSize + ", '" + usrName + "');";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -423,7 +437,7 @@ public class dbConnection {
 	}
 
 	public int delClsTbl(int tblID) {
-		String new_query = "delete from class_tables where ID=" + tblID + ";";
+		String new_query = "delete from class_tables where ID=" + tblID + " and teacherID='" + usrName + "';";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -431,7 +445,8 @@ public class dbConnection {
 			if (rowsAffected == 0) {
 				return 1;
 			} else {
-				String resetTable = "update students set tableID=0 where tableID=" + tblID + ";";
+				String resetTable = "update students set tableID=0 where tableID=" + tblID + " and teacherID='" + usrName
+						+ "';";
 
 				try {
 					stmt = conn.createStatement();
@@ -513,7 +528,7 @@ public class dbConnection {
 
 		else {
 			new_query = "insert into grades values(" + assignmentID + ", '" + assignmentTitle + "', '" + stdntName
-					+ "'," + stdntGrade + ");";
+					+ "'," + stdntGrade + ", '" + usrName + "');";
 
 			try {
 				Statement stmt = conn.createStatement();
@@ -530,7 +545,7 @@ public class dbConnection {
 	}
 
 	public ArrayList getAllAsgnmts() {
-		String new_query = "select * from assignments;";
+		String new_query = "select * from assignments where teacherID = '" + usrName + "';";
 		ArrayList asgnmtList = new ArrayList();
 
 		Statement stmt;
@@ -553,8 +568,9 @@ public class dbConnection {
 		}
 	}
 
+	// maybe add a class reference to the teacher and add an or statement foo
 	public String getAssgnmtDtl(String idNum) {
-		String new_query = "Select details from assignments where ID =" + idNum + ";";
+		String new_query = "Select details from assignments where ID =" + idNum + " and teacherID='" + usrName + "';";
 		String details = "";
 
 		try {
@@ -651,7 +667,7 @@ public class dbConnection {
 
 	public int recordAttendance(String studentID, String selectedDate, boolean is_present) {
 		String new_query = "insert into attendance values('" + studentID + "', '" + selectedDate + "', " + is_present
-				+ ");";
+				+ ", '" + usrName + "');";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -725,7 +741,7 @@ public class dbConnection {
 
 	public int logBehavior(String name, String date, String type, String comment) {
 		String new_query = "insert into behavior values('" + name + "', '" + date + "', '" + type + "', '" + comment
-				+ "');";
+				+ "', '" + usrName + "');";
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(new_query);
@@ -735,9 +751,17 @@ public class dbConnection {
 
 		return 0;
 	}
-	
+
 	public void setUser(String usrName) {
-		this.usrName = usrName;  
+		this.usrName = usrName;
+	}
+	
+	public void resetTrueAll() {
+		this.trueAll = false;
+	}
+
+	public void setTrueAll(boolean trueAll) {
+		this.trueAll = trueAll;
 	}
 }
 // end class

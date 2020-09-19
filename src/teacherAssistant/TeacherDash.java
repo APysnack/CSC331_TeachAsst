@@ -43,11 +43,13 @@ import org.jdesktop.swingx.JXDatePicker;
 
 public class TeacherDash extends JFrame {
 
-	String userName;
+	String usrName;
 	CardLayout cl;
 	JPanel scrnMgr;
 	dbConnection conn;
 	int error_flag = -1;
+	int targetInt = -1;
+	int tblMaxSize = 0;
 
 	// ------------------------------------------------------------------------ //
 	// Main Window
@@ -56,7 +58,7 @@ public class TeacherDash extends JFrame {
 	TeacherDash(dbConnection conn, String userName) {
 
 		this.conn = conn;
-		this.userName = userName;
+		this.usrName = userName;
 
 		this.setSize(900, 550);
 
@@ -161,7 +163,7 @@ public class TeacherDash extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				repaint();
 				revalidate();
-				JPanel asgnStgPnl = bldAsgnStgPnl(1);
+				JPanel asgnStgPnl = bldAsgnStgPnl();
 				scrnMgr.add(asgnStgPnl, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
 			}
@@ -391,7 +393,8 @@ public class TeacherDash extends JFrame {
 		}
 
 		String override_query = "!select grades.assignmentID, grades.assignmentTitle, grades.studentID, grades.grade, "
-				+ "assignments.points from grades inner join assignments on assignments.id = grades.assignmentID;";
+				+ "assignments.points from grades inner join assignments on assignments.id = grades.assignmentID where"
+				+ " assignments.teacherID='" + usrName + "';";
 
 		JTable table = conn.getJTable(override_query);
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -507,7 +510,8 @@ public class TeacherDash extends JFrame {
 		JComboBox asgnmtMenu = new JComboBox(asgnmtDataLst.toArray());
 
 		String override_query = "!select grades.assignmentID, grades.assignmentTitle, grades.studentID, grades.grade, "
-				+ "assignments.points from grades inner join assignments on assignments.id = grades.assignmentID;";
+				+ "assignments.points from grades inner join assignments on assignments.id = grades.assignmentID "
+				+ "where grades.teacherID='" + usrName + "';";
 
 		JTable table = conn.getJTable(override_query);
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -578,7 +582,7 @@ public class TeacherDash extends JFrame {
 	public JPanel bldStdntGrdPnl() {
 		JPanel stdntGrdPnl = new JPanel();
 
-		String override_query = "!select ID, tableID, grade from students;";
+		String override_query = "!select ID, tableID, grade from students where teacherID='" + usrName + "';";
 
 		JTable table = conn.getJTable(override_query);
 		JScrollPane dataScrollPane = new JScrollPane(table);
@@ -650,42 +654,32 @@ public class TeacherDash extends JFrame {
 		return clsBhvrPnl;
 	}
 
-	public JPanel bldAsgnStgPnl(int selectTbl) {
+	public JPanel bldAsgnStgPnl() {
 		JPanel asgnStg = new JPanel();
 
-		// will store all table data (tblname1, tblcapacity1, tblname2, tblcapcity2,
+		tblMaxSize = 0;
+
+		// will store all table data (tblname1, tblcapacity1, tblname2, tblcapacity2,
 		// etc.)
 		List<Integer> tblSizeData = new ArrayList<>();
 
-		// will contain a string-formatted list of above table data (e.g. table 1: 5
-		// seats)
-		List<String> tblDataList = new ArrayList<>();
-
-		// Gets the table names and sizes from the database
+		// Gets the table names and sizes relevant to the current teacher from the
+		// database
 		tblSizeData = conn.getClassTblSizes();
 
-		// placeholder string to store each iteration of string format into tblDataList
-		String temp_string = "";
-
-		// k will increment in steps of 1, l will increment in 2's
-		int l = 0;
-		int k = 1;
-
-		// while k < the number of tables in the array (not the number of indexes)
-		while (k <= (tblSizeData.size() / 2)) {
-
-			// i'th element is table name, i+1'th element is table's capacity
-			temp_string = "Table " + tblSizeData.get(l).toString() + ": " + tblSizeData.get(l + 1).toString()
-					+ " Seats";
-			tblDataList.add(temp_string);
-
-			// increments k for the number of elements in the array
-			k++;
-			l = l + 2;
+		if (targetInt == -1) {
+			// if table is not empty, set the target to the first table
+			if (!tblSizeData.isEmpty()) {
+				targetInt = tblSizeData.get(0);
+				tblMaxSize = conn.getClassTblSize(targetInt);
+			} else {
+				// otherwise the table is empty, no target
+				tblMaxSize = 0;
+			}
 		}
 
-		// gets the max size of the individual table selected
-		int tblMaxSize = conn.getClassTblSize(selectTbl);
+		// initializes table data into string format Table X: Y Seats
+		List<String> tblDataList = initializeTblSel(tblSizeData);
 
 		// sets focus on the menu with the list of tables
 		JComboBox tblMenu = new JComboBox(tblDataList.toArray());
@@ -698,12 +692,12 @@ public class TeacherDash extends JFrame {
 
 		// sets the currently selected table to the one selected in the function
 		// argument
-		tblMenu.setSelectedItem("Table " + selectTbl + ": " + tblMaxSize + " Seats");
+		tblMenu.setSelectedItem("Table " + targetInt + ": " + tblMaxSize + " Seats");
 		asgnStg.add(tblMenu);
 
 		// gets list of all students and all students at the selected table
 		ArrayList allStdnts = conn.getAllNames("Students");
-		ArrayList tblStdnts = conn.getTblStdnts(selectTbl);
+		ArrayList tblStdnts = conn.getTblStdnts(targetInt);
 		ArrayList unassignedStdnts = conn.getTblStdnts(0);
 
 		// creates an array of labels to store n images
@@ -748,11 +742,11 @@ public class TeacherDash extends JFrame {
 
 				// replaces all non-digits with blanks
 				// Selected table is the currently selected table name
-				int selectedTbl = Integer.parseInt(str.replaceAll("[\\D]", ""));
+				targetInt = Integer.parseInt(str.replaceAll("[\\D]", ""));
 
 				repaint();
 				revalidate();
-				JPanel asgnStg = bldAsgnStgPnl(selectedTbl);
+				JPanel asgnStg = bldAsgnStgPnl();
 				scrnMgr.add(asgnStg, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
 
@@ -764,7 +758,15 @@ public class TeacherDash extends JFrame {
 		asgnStg.add(submit);
 		asgnStg.add(randomize);
 		asgnStg.add(backBtn);
-		backBtn.addActionListener(e -> cl.show(scrnMgr, "Attendance"));
+
+		backBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				targetInt = -1;
+				repaint();
+				revalidate();
+				cl.show(scrnMgr, "Attendance");
+			}
+		});
 
 		submit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
@@ -778,11 +780,12 @@ public class TeacherDash extends JFrame {
 					}
 				}
 
-				conn.updateTableSeats(selectTbl, seatList);
-
+				conn.updateTableSeats(targetInt, seatList);
+				
+				targetInt = -1;
 				repaint();
 				revalidate();
-				JPanel asgnStg = bldAsgnStgPnl(selectTbl);
+				JPanel asgnStg = bldAsgnStgPnl();
 				scrnMgr.add(asgnStg, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
 
@@ -792,11 +795,11 @@ public class TeacherDash extends JFrame {
 
 		randomize.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				conn.randomizeTables(userName);
+				conn.randomizeTables(usrName);
 
 				repaint();
 				revalidate();
-				JPanel asgnStg = bldAsgnStgPnl(selectTbl);
+				JPanel asgnStg = bldAsgnStgPnl();
 				scrnMgr.add(asgnStg, "Assign Seating");
 				cl.show(scrnMgr, "Assign Seating");
 			}
@@ -932,7 +935,8 @@ public class TeacherDash extends JFrame {
 		JButton backBtn = new JButton("Back");
 
 		String override_query = "!select students.id, attendance.clsDate, attendance.isPresent, "
-				+ "students.absences from students inner join attendance on attendance.stdntID = students.id;";
+				+ "students.absences from students inner join attendance on attendance.stdntID = students.id where"
+				+ " attendance.teacherID = '" + usrName + "';";
 
 		JTable table = conn.getJTable(override_query);
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -960,7 +964,7 @@ public class TeacherDash extends JFrame {
 		picker.setDate(Calendar.getInstance().getTime());
 		picker.setFormats(new SimpleDateFormat("MM.dd.yyyy"));
 		picker.getUI();
-		
+
 		JButton backBtn = new JButton("Back");
 
 		JPanel dtlPanl = new JPanel(new GridLayout(2, 1, 0, 0));
@@ -1109,6 +1113,34 @@ public class TeacherDash extends JFrame {
 		});
 
 		return delAsgnmtPnl;
+	}
+
+	public List<String> initializeTblSel(List<Integer> tblSizeData) {
+		// will contain a string-formatted list of above table data (e.g. table 1: 5
+		// seats)
+		List<String> tblDataList = new ArrayList<>();
+
+		// placeholder string to store each iteration of string format into tblDataList
+		String temp_string = "";
+
+		// k will increment in steps of 1, l will increment in 2's
+		int l = 0;
+		int k = 1;
+
+		// while k < the number of tables in the array (not the number of indexes)
+		while (k <= (tblSizeData.size() / 2)) {
+
+			// i'th element is table name, i+1'th element is table's capacity
+			temp_string = "Table " + tblSizeData.get(l).toString() + ": " + tblSizeData.get(l + 1).toString()
+					+ " Seats";
+			tblDataList.add(temp_string);
+
+			// increments k for the number of elements in the array
+			k++;
+			l = l + 2;
+		}
+
+		return tblDataList;
 	}
 
 	public JLabel makeChair() {
