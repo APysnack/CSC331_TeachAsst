@@ -42,15 +42,10 @@ import javax.swing.border.EmptyBorder;
 import org.jdesktop.swingx.JXDatePicker;
 
 public class TeacherDash extends JFrame {
-	
+
 	String userName;
-	JButton lgnBtn, getPwBtn;
-	JLabel lgnLbl;
-	JTextField usrField, pwField;
-	JPanel currPanel;
 	CardLayout cl;
 	JPanel scrnMgr;
-	JPanel lgnPanel;
 	dbConnection conn;
 	int error_flag = -1;
 
@@ -244,9 +239,15 @@ public class TeacherDash extends JFrame {
 				for (int i = 0; i < chkBoxList.size(); i++) {
 					name = chkBoxList.get(i).getText();
 					is_present = chkBoxList.get(i).isSelected();
-					error_flag = conn.recordAttendance(name, selectedDate, is_present);
+					conn.recordAttendance(name, selectedDate, is_present);
 					error_flag = -1;
 				}
+
+				repaint();
+				revalidate();
+				JPanel rcrdAtndPnl = bldRcrdAtndPnl();
+				scrnMgr.add(rcrdAtndPnl, "Record Attendance");
+				cl.show(scrnMgr, "Record Attendance");
 			}
 		});
 
@@ -311,7 +312,7 @@ public class TeacherDash extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				repaint();
 				revalidate();
-				JPanel addGrdPnl = bldAddGrdPnl();
+				JPanel addGrdPnl = bldAddGrdPnl("");
 				scrnMgr.add(addGrdPnl, "Add Grade");
 				cl.show(scrnMgr, "Add Grade");
 			}
@@ -341,7 +342,7 @@ public class TeacherDash extends JFrame {
 		return clsGrdPnl;
 	}
 
-	public JPanel bldAddGrdPnl() {
+	public JPanel bldAddGrdPnl(String selAsgnmt) {
 		JPanel addGrdPnl = new JPanel();
 		JButton sbmtGrdBtn = new JButton("Submit Grade");
 		JButton backBtn = new JButton("Back");
@@ -358,6 +359,9 @@ public class TeacherDash extends JFrame {
 
 		if (error_flag == 4) {
 			lbl.setText("ERROR: Grades may only contain numbers");
+			error_flag = -1;
+		} else if (error_flag == -2) {
+			lbl.setText("Grades should have a maximum of 6 digits and no more than 2 decimal places");
 			error_flag = -1;
 		} else {
 			lbl = check_errors("Grade");
@@ -379,6 +383,12 @@ public class TeacherDash extends JFrame {
 		}
 
 		JComboBox asgnmtMenu = new JComboBox(asgnmtDataLst.toArray());
+
+		if (selAsgnmt == "") {
+			asgnmtMenu.setSelectedIndex(0);
+		} else {
+			asgnmtMenu.setSelectedItem(selAsgnmt);
+		}
 
 		String override_query = "!select grades.assignmentID, grades.assignmentTitle, grades.studentID, grades.grade, "
 				+ "assignments.points from grades inner join assignments on assignments.id = grades.assignmentID;";
@@ -407,12 +417,17 @@ public class TeacherDash extends JFrame {
 				String num = "";
 				String assignmentTitle = "";
 
+				// extracts assignment title and number from tempString (formatted as Assignment
+				// Number X: AsgnmtTitle)
 				while (i < tempString.length()) {
+
+					// extracts the title following the colon
 					if (tempString.charAt(i) == ':') {
 						assignmentTitle = tempString.substring((i + 2), tempString.length());
 						break;
 					}
 
+					// gets the id number
 					if (Character.isDigit(tempString.charAt(i))) {
 						while (Character.isDigit(tempString.charAt(i))) {
 							num = num + tempString.charAt(i);
@@ -430,15 +445,19 @@ public class TeacherDash extends JFrame {
 
 				if (grdTxtFld.getText().matches("^[0-9]*\\.?[0-9]+$") && grdTxtFld.getText().length() > 0) {
 					double stdntGrade = Double.parseDouble(grdTxtFld.getText());
+
 					error_flag = conn.addGrades(assignmentID, assignmentTitle, stdntName, stdntGrade, "Add");
+
 				} else {
 					error_flag = 4;
 
 				}
 
+				String itemSelect = asgnmtMenu.getSelectedItem().toString();
+
 				repaint();
 				revalidate();
-				JPanel addGrdPnl = bldAddGrdPnl();
+				JPanel addGrdPnl = bldAddGrdPnl(itemSelect);
 				scrnMgr.add(addGrdPnl, "Add Grade");
 				cl.show(scrnMgr, "Add Grade");
 			}

@@ -518,12 +518,12 @@ public class dbConnection {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate(new_query);
 				updateGrade(stdntName);
-
 				return 0;
 			} catch (SQLIntegrityConstraintViolationException e) {
 				return 2;
 			} catch (SQLException e) {
-				return 3;
+				// most likely cause of error is too many digits
+				return -2;
 			}
 		}
 	}
@@ -583,7 +583,7 @@ public class dbConnection {
 			} else {
 				return absCount;
 			}
-			
+
 		} catch (SQLException e) {
 			System.out.println(e);
 			return -1;
@@ -591,11 +591,10 @@ public class dbConnection {
 	}
 
 	public int updateGrade(String studentID) {
-
 		double grade = getGrade(studentID);
 
 		String new_query = "update students set grade=" + grade + " where ID='" + studentID + "';";
-
+		
 		try {
 			Statement stmt = conn.createStatement();
 			int rowsAffected = stmt.executeUpdate(new_query);
@@ -606,6 +605,7 @@ public class dbConnection {
 			}
 		} catch (SQLException e) {
 			System.out.println(e);
+			
 			return 3;
 		}
 	}
@@ -643,9 +643,9 @@ public class dbConnection {
 			}
 			return total;
 		} catch (SQLException e) {
-			System.out.println(e);
+			return -2;
 		}
-		return 0;
+
 	}
 
 	public int recordAttendance(String studentID, String selectedDate, boolean is_present) {
