@@ -138,8 +138,9 @@ public class LoginWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				String userName = usrField.getText();
-				String password = pwField.getText();
-
+				String password = String.valueOf(pwField.getPassword());
+				
+				conn.setUser(userName);
 				int privilege = conn.connectUser(userName, password);
 
 				if (privilege == 1) {

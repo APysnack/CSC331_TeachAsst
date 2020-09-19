@@ -792,7 +792,7 @@ public class TeacherDash extends JFrame {
 
 		randomize.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				conn.randomizeTables();
+				conn.randomizeTables(userName);
 
 				repaint();
 				revalidate();
@@ -955,8 +955,12 @@ public class TeacherDash extends JFrame {
 		JTextField asgnmtTtlFld = new JTextField("", 7);
 		JLabel asgnmtPtLbl = new JLabel("Assignment Points");
 		JTextField asgnmtPtFld = new JTextField("", 3);
-		JLabel asgnmtDateLbl = new JLabel("Due Date (YYYY-MM-DD)");
-		JTextField asgnmtDateFld = new JTextField("", 6);
+
+		JXDatePicker picker = new JXDatePicker();
+		picker.setDate(Calendar.getInstance().getTime());
+		picker.setFormats(new SimpleDateFormat("MM.dd.yyyy"));
+		picker.getUI();
+		
 		JButton backBtn = new JButton("Back");
 
 		JPanel dtlPanl = new JPanel(new GridLayout(2, 1, 0, 0));
@@ -1010,8 +1014,7 @@ public class TeacherDash extends JFrame {
 		compositePnl.add(asgnmtTtlFld);
 		compositePnl.add(asgnmtPtLbl);
 		compositePnl.add(asgnmtPtFld);
-		compositePnl.add(asgnmtDateLbl);
-		compositePnl.add(asgnmtDateFld);
+		compositePnl.add(picker);
 		compositePnl.add(crtAsgnmtBtn);
 
 		crtAsgnmtPnl.add(compositePnl, BorderLayout.NORTH);
@@ -1039,9 +1042,10 @@ public class TeacherDash extends JFrame {
 				String title = asgnmtTtlFld.getText();
 				String details = asgnmtDtlArea.getText();
 				String points = asgnmtPtFld.getText();
-				String date = asgnmtDateFld.getText();
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				String selectedDate = dateFormat.format(picker.getDate());
 
-				error_flag = conn.addAssignment(id, title, details, points, date);
+				error_flag = conn.addAssignment(id, title, details, points, selectedDate);
 
 				repaint();
 				revalidate();

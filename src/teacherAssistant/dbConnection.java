@@ -27,6 +27,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 //	4: function specific, 5: delete success, 6: edit success]
 
 public class dbConnection {
+	String usrName;
 	String name;
 	String password;
 	String url;
@@ -449,7 +450,7 @@ public class dbConnection {
 
 	}
 
-	public void randomizeTables() {
+	public void randomizeTables(String tchrName) {
 		// list: {tblName1, tblSize1, tblName2, tblSize2..}
 		List<Integer> tableContents = getClassTblSizes();
 
@@ -594,7 +595,7 @@ public class dbConnection {
 		double grade = getGrade(studentID);
 
 		String new_query = "update students set grade=" + grade + " where ID='" + studentID + "';";
-		
+
 		try {
 			Statement stmt = conn.createStatement();
 			int rowsAffected = stmt.executeUpdate(new_query);
@@ -605,7 +606,7 @@ public class dbConnection {
 			}
 		} catch (SQLException e) {
 			System.out.println(e);
-			
+
 			return 3;
 		}
 	}
@@ -733,6 +734,10 @@ public class dbConnection {
 		}
 
 		return 0;
+	}
+	
+	public void setUser(String usrName) {
+		this.usrName = usrName;  
 	}
 }
 // end class
