@@ -33,7 +33,8 @@ public class dbConnection {
 	String name;
 	String password;
 	String url;
-	String query;
+	String new_query;
+	ResultSet result;
 	String emailDomain = "@hogwarts.com";
 	Connection conn;
 
@@ -52,10 +53,10 @@ public class dbConnection {
 
 	public int connectUser(String userName, String userPW) {
 		int privilege = 0;
-		String new_query = "Select * from users where ID = '" + userName + "' AND Password = '" + userPW + "'";
+		new_query = "Select * from users where ID = '" + userName + "' AND Password = '" + userPW + "'";
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet result = stmt.executeQuery(new_query);
+			result = stmt.executeQuery(new_query);
 
 			if (result.next()) {
 				privilege = (int) result.getInt(3);
@@ -70,7 +71,7 @@ public class dbConnection {
 	} // end function
 
 	public int createUser(String userName, String userPW, int Privilege, String arg0) {
-		String new_query = "Insert into users values ('" + userName + "', '" + userPW + "', " + Privilege + ");";
+		new_query = "Insert into users values ('" + userName + "', '" + userPW + "', " + Privilege + ");";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -98,7 +99,7 @@ public class dbConnection {
 	}
 
 	public int createStudent(String userName, String teacherName) {
-		String new_query = "insert into students values ('" + userName + "', '" + teacherName + "', 0, 0, 0);";
+		new_query = "insert into students values ('" + userName + "', '" + teacherName + "', 0, 0, 0);";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -112,7 +113,7 @@ public class dbConnection {
 
 	public int createTeacher(String userName, String subject) {
 		String email = userName + emailDomain;
-		String new_query = "insert into teachers values ('" + userName + "', '" + email + "', '" + subject + "');";
+		new_query = "insert into teachers values ('" + userName + "', '" + email + "', '" + subject + "');";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -145,16 +146,16 @@ public class dbConnection {
 
 	public int getPrivilege(String userName) {
 
-		String new_query = "select privilege from Users where ID='" + userName + "';";
+		new_query = "select privilege from Users where ID='" + userName + "';";
 		Statement stmt;
 		int i = 1;
 		int privilege = 0;
 
 		try {
 			stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(new_query);
-			if (rs.next()) {
-				privilege = rs.getInt(i);
+			result = stmt.executeQuery(new_query);
+			if (result.next()) {
+				privilege = result.getInt(i);
 			}
 
 			return privilege;
@@ -166,7 +167,7 @@ public class dbConnection {
 	}
 
 	public int removeRow(String table, String id) {
-		String new_query = "Delete from " + table + " where ID='" + id + "';";
+		new_query = "Delete from " + table + " where ID='" + id + "';";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -188,7 +189,7 @@ public class dbConnection {
 
 	public JTable getJTable(String tbl) {
 
-		String new_query = "";
+		new_query = "";
 
 		char first_letter = tbl.charAt(0);
 
@@ -209,7 +210,7 @@ public class dbConnection {
 
 			Statement stmt = conn.createStatement();
 			stmt.executeQuery(new_query);
-			ResultSet result = stmt.getResultSet();
+			result = stmt.getResultSet();
 			ResultSetMetaData metadata = result.getMetaData();
 			int colCount = metadata.getColumnCount();
 
@@ -267,7 +268,7 @@ public class dbConnection {
 	}
 
 	public int addAssignment(String id, String title, String details, String points, String dueDate) {
-		String new_query = "insert into assignments values (" + id + ", '" + title + "', '" + details + "', " + points
+		new_query = "insert into assignments values (" + id + ", '" + title + "', '" + details + "', " + points
 				+ ", '" + dueDate + "', '" + usrName + "');";
 
 		if (!StringUtils.isStrictlyNumeric(id) || !StringUtils.isStrictlyNumeric(points) || dueDate.length() < 10) {
@@ -293,11 +294,11 @@ public class dbConnection {
 
 	// gets the size of an individual table (arg0)
 	public int getClassTblSize(int tblNum) {
-		String new_query = "select size from class_tables where ID=" + tblNum + " and teacherID='" + usrName + "';";
+		new_query = "select size from class_tables where ID=" + tblNum + " and teacherID='" + usrName + "';";
 		int size = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet result = stmt.executeQuery(new_query);
+			result = stmt.executeQuery(new_query);
 			if (result.next()) {
 				size = result.getInt(1);
 			}
@@ -313,13 +314,13 @@ public class dbConnection {
 	// gets the names/sizes of each table and stores in list {tblName1, tblSize1,
 	// tblName2, tblSize2..}
 	public List<Integer> getClassTblSizes() {
-		String new_query = "select id, size from class_tables where teacherID='" + usrName + "';";
+		new_query = "select id, size from class_tables where teacherID='" + usrName + "';";
 
 		List<Integer> tblSizes = new ArrayList<>();
 
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet result = stmt.executeQuery(new_query);
+			result = stmt.executeQuery(new_query);
 
 			while (result.next()) {
 				tblSizes.add(result.getInt(1));
@@ -335,14 +336,14 @@ public class dbConnection {
 
 	// gets all students that are assigned to table arg0
 	public ArrayList getTblStdnts(int tblNum) {
-		String new_query = "select * from students where tableID=" + tblNum + " and teacherID='" + usrName + "';";
+		new_query = "select * from students where tableID=" + tblNum + " and teacherID='" + usrName + "';";
 		ArrayList tblList = new ArrayList();
 
 		Statement stmt;
 		try {
 			stmt = conn.createStatement();
 			stmt.executeQuery(new_query);
-			ResultSet result = stmt.getResultSet();
+			result = stmt.getResultSet();
 			ResultSetMetaData metadata = result.getMetaData();
 
 			while (result.next()) {
@@ -359,7 +360,7 @@ public class dbConnection {
 
 	// gets ID's of all students in the database
 	public ArrayList getAllNames(String tableName) {
-		String new_query = "select * from " + tableName + " where teacherID='" + usrName + "';";
+		new_query = "select * from " + tableName + " where teacherID='" + usrName + "';";
 
 		if (trueAll == true) {
 			new_query = "select * from " + tableName + ";";
@@ -372,7 +373,7 @@ public class dbConnection {
 		try {
 			stmt = conn.createStatement();
 			stmt.executeQuery(new_query);
-			ResultSet result = stmt.getResultSet();
+			result = stmt.getResultSet();
 			ResultSetMetaData metadata = result.getMetaData();
 
 			while (result.next()) {
@@ -436,7 +437,7 @@ public class dbConnection {
 	}
 
 	public int addClsTbl(int tblID, int tblSize) {
-		String new_query = "insert into class_tables values(" + tblID + "," + tblSize + ", '" + usrName + "');";
+		new_query = "insert into class_tables values(" + tblID + "," + tblSize + ", '" + usrName + "');";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -452,7 +453,7 @@ public class dbConnection {
 	}
 
 	public int delClsTbl(int tblID) {
-		String new_query = "delete from class_tables where ID=" + tblID + " and teacherID='" + usrName + "';";
+		new_query = "delete from class_tables where ID=" + tblID + " and teacherID='" + usrName + "';";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -481,7 +482,7 @@ public class dbConnection {
 	}
 
 	public void randomizeTables(String tchrName) {
-		String new_query = "update students set tableID=0 where teacherID = '" + usrName + "';";
+		new_query = "update students set tableID=0 where teacherID = '" + usrName + "';";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -546,8 +547,7 @@ public class dbConnection {
 
 	public int addGrades(int assignmentID, String assignmentTitle, String stdntName, double stdntGrade, String mode) {
 
-		String new_query = "";
-		System.out.println(new_query);
+		new_query = "";
 
 		if (mode.equalsIgnoreCase("Edit")) {
 			new_query = "delete from grades where assignmentID=" + assignmentID + " and studentID='" + stdntName + "';";
@@ -589,14 +589,14 @@ public class dbConnection {
 	}
 
 	public ArrayList getAllAsgnmts() {
-		String new_query = "select * from assignments where teacherID = '" + usrName + "';";
+		new_query = "select * from assignments where teacherID = '" + usrName + "';";
 		ArrayList asgnmtList = new ArrayList();
 
 		Statement stmt;
 		try {
 			stmt = conn.createStatement();
 			stmt.executeQuery(new_query);
-			ResultSet result = stmt.getResultSet();
+			result = stmt.getResultSet();
 			ResultSetMetaData metadata = result.getMetaData();
 
 			while (result.next()) {
@@ -614,14 +614,14 @@ public class dbConnection {
 
 	// maybe add a class reference to the teacher and add an or statement foo
 	public String getAssgnmtDtl(String idNum) {
-		String new_query = "Select details from assignments where ID =" + idNum + " and teacherID='" + usrName + "';";
+		new_query = "Select details from assignments where ID =" + idNum + " and teacherID='" + usrName + "';";
 		String details = "";
 
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(new_query);
-			if (rs.next()) {
-				details = rs.getString(1);
+			result = stmt.executeQuery(new_query);
+			if (result.next()) {
+				details = result.getString(1);
 			}
 			return details;
 		} catch (SQLException e) {
@@ -632,14 +632,14 @@ public class dbConnection {
 
 	public int getAbsences(String studentID) {
 		int absCount = 0;
-		String new_query = "select absences from students where ID='" + studentID + "';";
+		new_query = "select absences from students where ID='" + studentID + "';";
 
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(new_query);
+			result = stmt.executeQuery(new_query);
 
-			if (rs.next()) {
-				absCount = rs.getInt(1);
+			if (result.next()) {
+				absCount = result.getInt(1);
 				return absCount;
 			} else {
 				return absCount;
@@ -654,7 +654,7 @@ public class dbConnection {
 	public int updateGrade(String studentID) {
 		double grade = getGrade(studentID);
 
-		String new_query = "update students set grade=" + grade + " where ID='" + studentID + "';";
+		new_query = "update students set grade=" + grade + " where ID='" + studentID + "';";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -672,7 +672,7 @@ public class dbConnection {
 	}
 
 	public double getGrade(String studentID) {
-		String new_query = "select grades.studentID, grades.grade, assignments.points, assignments.id, "
+		new_query = "select grades.studentID, grades.grade, assignments.points, assignments.id, "
 				+ "assignments.title from grades inner join assignments on assignments.ID = grades.assignmentid"
 				+ " where studentID=?";
 
@@ -688,7 +688,7 @@ public class dbConnection {
 
 			// sets first ? value in prepared statement to studentID.
 			stmt.setString(1, studentID);
-			ResultSet result = stmt.executeQuery();
+			result = stmt.executeQuery();
 
 			if (result.next()) {
 				result.beforeFirst();
@@ -710,7 +710,7 @@ public class dbConnection {
 	}
 
 	public int recordAttendance(String studentID, String selectedDate, boolean is_present) {
-		String new_query = "insert into attendance values('" + studentID + "', '" + selectedDate + "', " + is_present
+		new_query = "insert into attendance values('" + studentID + "', '" + selectedDate + "', " + is_present
 				+ ", '" + usrName + "');";
 
 		try {
@@ -733,7 +733,7 @@ public class dbConnection {
 	}
 
 	public void addAbsence(String studentID) {
-		String new_query = "update students set absences=(absences+1) where ID='" + studentID + "';";
+		new_query = "update students set absences=(absences+1) where ID='" + studentID + "';";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -745,7 +745,7 @@ public class dbConnection {
 	}
 
 	public ArrayList getEnumFields(String tableName, String fieldName) {
-		String new_query = "Show columns from " + tableName + " where field=?";
+		new_query = "Show columns from " + tableName + " where field=?";
 		ArrayList numList = new ArrayList<>();
 		int i = 1;
 		String str = "";
@@ -757,7 +757,7 @@ public class dbConnection {
 
 			// sets first ? value in prepared statement to studentID.
 			stmt.setString(1, fieldName);
-			ResultSet result = stmt.executeQuery();
+			result = stmt.executeQuery();
 			result.beforeFirst();
 			if (result.next()) {
 				str = result.getString(i + 1);
@@ -784,7 +784,7 @@ public class dbConnection {
 	}
 
 	public int logBehavior(String name, String date, String type, String comment) {
-		String new_query = "insert into behavior values('" + name + "', '" + date + "', '" + type + "', '" + comment
+		new_query = "insert into behavior values('" + name + "', '" + date + "', '" + type + "', '" + comment
 				+ "', '" + usrName + "');";
 		try {
 			Statement stmt = conn.createStatement();

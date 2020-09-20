@@ -14,12 +14,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -209,17 +211,18 @@ public class TeacherDash extends JFrame {
 		JButton sbmtBtn = new JButton("Submit");
 		JButton backBtn = new JButton("Back");
 		JLabel lbl = new JLabel("Is the student present? Check if yes.");
+		
 		JXDatePicker picker = new JXDatePicker();
 		picker.setDate(Calendar.getInstance().getTime());
-		picker.setFormats(new SimpleDateFormat("MM.dd.YYYY"));
+		picker.setFormats(new SimpleDateFormat("MM.dd.yyyy"));
 		picker.getUI();
+		rcrdAtndPnl.add(picker);
+		
 
 		ArrayList allStdnts = conn.getAllNames("Students");
 		JPanel stndtPnl = new JPanel();
 		List<JCheckBox> chkBoxList = new ArrayList<>();
 		ButtonGroup grp = new ButtonGroup();
-
-		rcrdAtndPnl.add(picker);
 
 		for (int i = 0; i < allStdnts.size(); i++) {
 			JCheckBox chkBox = new JCheckBox(allStdnts.get(i).toString());
@@ -234,6 +237,7 @@ public class TeacherDash extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 				String selectedDate = dateFormat.format(picker.getDate());
+				System.out.println(picker.getDate());
 
 				String name = "";
 				boolean is_present = false;
