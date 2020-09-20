@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -186,7 +187,7 @@ public class dbConnection {
 	} // end remove user function
 
 	public JTable getJTable(String tbl) {
-		
+
 		String new_query = "";
 
 		char first_letter = tbl.charAt(0);
@@ -194,12 +195,10 @@ public class dbConnection {
 		// built so user can override the default query
 		if (first_letter == '!') {
 			new_query = tbl.substring(1, tbl.length());
-		} 
-		else if (trueAll == true) {
+		} else if (trueAll == true) {
 			new_query = "Select * from " + tbl + ";";
 			resetTrueAll();
-		} 
-		else {
+		} else {
 			new_query = "Select * from " + tbl + " where teacherID='" + usrName + "';";
 		}
 
@@ -420,6 +419,22 @@ public class dbConnection {
 		return 0;
 	}
 
+	public int updateSingleSeat(int tableID, String name) {
+		String addName = "update students set tableID=" + tableID + " where ID='" + name + "' and teacherID='" + usrName
+				+ "';";
+
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(addName);
+
+		} catch (SQLException e) {
+			System.out.println(e);
+			return 1;
+		}
+
+		return 0;
+	}
+
 	public int addClsTbl(int tblID, int tblSize) {
 		String new_query = "insert into class_tables values(" + tblID + "," + tblSize + ", '" + usrName + "');";
 
@@ -445,8 +460,8 @@ public class dbConnection {
 			if (rowsAffected == 0) {
 				return 1;
 			} else {
-				String resetTable = "update students set tableID=0 where tableID=" + tblID + " and teacherID='" + usrName
-						+ "';";
+				String resetTable = "update students set tableID=0 where tableID=" + tblID + " and teacherID='"
+						+ usrName + "';";
 
 				try {
 					stmt = conn.createStatement();
@@ -466,37 +481,66 @@ public class dbConnection {
 	}
 
 	public void randomizeTables(String tchrName) {
+		String new_query = "update students set tableID=0 where teacherID = '" + usrName + "';";
+
+		try {
+			Statement stmt = conn.createStatement();
+			int rowsAffected = stmt.executeUpdate(new_query);
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
 		// list: {tblName1, tblSize1, tblName2, tblSize2..}
 		List<Integer> tableContents = getClassTblSizes();
+		List<Integer> stsFilled = new ArrayList();
 
+		int k = 0;
+
+		// initializes seats filled to be the same size as tableContents with all 0
+		// values
+		while (k <= (tableContents.size())) {
+			stsFilled.add(k, 0);
+			k++;
+		}
+
+		// a randomized list of all the student names
 		ArrayList studentNames = getAllNames("students");
-		Collections.shuffle(studentNames);
+		Collections.shuffle(studentNames, new Random());
+
+		List<String> stdnts = new ArrayList<>();
+
+		// converts the list of student names to a list of string representations
+		// ("Table X: Y Seats")
+		for (int i = 0; i < studentNames.size(); i++) {
+			stdnts.add(studentNames.get(i).toString());
+		}
 
 		int i = 0;
 		int j = 0;
-		int k = 1;
+		k = 0;
 
-		// while k is less than the number of tables
-		while (k <= (tableContents.size() / 2)) {
-
-			// gets the capacity of the table i
-			int tableCapacity = tableContents.get(i + 1);
-
-			List<String> stdnts = new ArrayList<>();
-
-			// makes a list of students the size of table i's capacity
-			for (int l = 0; l < tableCapacity; l++) {
-				if (j < studentNames.size()) {
-					stdnts.add(studentNames.get(j).toString());
-				}
-				j++;
+		while (j < stdnts.size()) {
+			// if j becomes greater than the number of elements in the array, reset i to 0
+			// (start at table 1 again)
+			if (k > (tableContents.size() / 2) - 1) {
+				i = 0;
+				k = 0;
 			}
+			
+			// if the number of seats already assigned to table i > table i's capacity,
+			// check next table
+			if (stsFilled.get(k) >= tableContents.get(i + 1)) {
+				i++;
+				k++;
+			}
+			
+			updateSingleSeat(tableContents.get(i), stdnts.get(j));
 
-			// updates table i with the listed students
-			updateTableSeats(tableContents.get(i), stdnts);
-
-			k++;
+			// increments the number of seats filled at index i by 1
+			stsFilled.add(k, stsFilled.get(k) + 1);
 			i = i + 2;
+			j++;
+			k++;
 		}
 	}
 
@@ -755,7 +799,7 @@ public class dbConnection {
 	public void setUser(String usrName) {
 		this.usrName = usrName;
 	}
-	
+
 	public void resetTrueAll() {
 		this.trueAll = false;
 	}

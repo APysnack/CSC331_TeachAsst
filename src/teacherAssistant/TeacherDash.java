@@ -668,16 +668,17 @@ public class TeacherDash extends JFrame {
 		tblSizeData = conn.getClassTblSizes();
 
 		if (targetInt == -1) {
-			// if table is not empty, set the target to the first table
-			if (!tblSizeData.isEmpty()) {
-				targetInt = tblSizeData.get(0);
-				tblMaxSize = conn.getClassTblSize(targetInt);
-			} else {
-				// otherwise the table is empty, no target
+			if (tblSizeData.isEmpty()) {
 				tblMaxSize = 0;
 			}
+			else {
+				targetInt = tblSizeData.get(0);
+				tblMaxSize = conn.getClassTblSize(targetInt);
+			}
+		} else {
+			tblMaxSize = conn.getClassTblSize(targetInt);
 		}
-
+		// foo 
 		// initializes table data into string format Table X: Y Seats
 		List<String> tblDataList = initializeTblSel(tblSizeData);
 
@@ -781,7 +782,7 @@ public class TeacherDash extends JFrame {
 				}
 
 				conn.updateTableSeats(targetInt, seatList);
-				
+
 				targetInt = -1;
 				repaint();
 				revalidate();
