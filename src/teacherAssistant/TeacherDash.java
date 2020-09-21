@@ -211,13 +211,12 @@ public class TeacherDash extends JFrame {
 		JButton sbmtBtn = new JButton("Submit");
 		JButton backBtn = new JButton("Back");
 		JLabel lbl = new JLabel("Is the student present? Check if yes.");
-		
+
 		JXDatePicker picker = new JXDatePicker();
 		picker.setDate(Calendar.getInstance().getTime());
 		picker.setFormats(new SimpleDateFormat("MM.dd.yyyy"));
 		picker.getUI();
 		rcrdAtndPnl.add(picker);
-		
 
 		ArrayList allStdnts = conn.getAllNames("Students");
 		JPanel stndtPnl = new JPanel();
@@ -282,7 +281,7 @@ public class TeacherDash extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				repaint();
 				revalidate();
-				JPanel crtAsgnmtPnl = bldCrtAsgnmtPnl();
+				JPanel crtAsgnmtPnl = bldCrtAsgnmtPnl("");
 				scrnMgr.add(crtAsgnmtPnl, "Create Assignment");
 				cl.show(scrnMgr, "Create Assignment");
 			}
@@ -674,15 +673,14 @@ public class TeacherDash extends JFrame {
 		if (targetInt == -1) {
 			if (tblSizeData.isEmpty()) {
 				tblMaxSize = 0;
-			}
-			else {
+			} else {
 				targetInt = tblSizeData.get(0);
 				tblMaxSize = conn.getClassTblSize(targetInt);
 			}
 		} else {
 			tblMaxSize = conn.getClassTblSize(targetInt);
 		}
-		// foo 
+
 		// initializes table data into string format Table X: Y Seats
 		List<String> tblDataList = initializeTblSel(tblSizeData);
 
@@ -954,7 +952,7 @@ public class TeacherDash extends JFrame {
 		return vwAtndPnl;
 	}
 
-	public JPanel bldCrtAsgnmtPnl() {
+	public JPanel bldCrtAsgnmtPnl(String txtAreaDtls) {
 		JPanel crtAsgnmtPnl = new JPanel(new BorderLayout());
 
 		JLabel asgnmtIDLbl = new JLabel("Assignment ID");
@@ -979,6 +977,8 @@ public class TeacherDash extends JFrame {
 		asgnmtDtlArea.setEditable(true);
 		asgnmtDtlArea.setLineWrap(true);
 		asgnmtDtlArea.setWrapStyleWord(true);
+		asgnmtDtlArea.setText(txtAreaDtls);
+
 		JScrollPane dtlScrollPane = new JScrollPane(asgnmtDtlArea);
 
 		JPanel pad = new JPanel();
@@ -1006,7 +1006,16 @@ public class TeacherDash extends JFrame {
 		txtAreaComposite.add(backBtnComposite, BorderLayout.SOUTH);
 
 		dtlPanl.add(txtAreaComposite);
-		dtlPanl.add(pad5);
+
+		JLabel lbl = new JLabel("");
+
+		if (error_flag == 4) {
+			lbl.setText("Assignment ID & Points Must be Numbers");
+		} else {
+			lbl = check_errors("Assignment");
+		}
+
+		dtlPanl.add(lbl);
 
 		JPanel middleComposite = new JPanel(new GridLayout(1, 2, 5, 5));
 
@@ -1029,20 +1038,6 @@ public class TeacherDash extends JFrame {
 		crtAsgnmtPnl.add(compositePnl, BorderLayout.NORTH);
 		crtAsgnmtPnl.add(middleComposite, BorderLayout.CENTER);
 
-		JLabel lbl = new JLabel();
-
-		if (error_flag == 4) {
-			JLabel frmt_err = new JLabel("ERROR: An error was detected in the format of your entry.");
-			JLabel frmt_err2 = new JLabel("Please double check your date format. Point/ID values must also be numeric");
-			crtAsgnmtPnl.add(frmt_err);
-			crtAsgnmtPnl.add(frmt_err2);
-			error_flag = -1;
-		} else {
-			lbl = check_errors("Assignment");
-		}
-
-		compositePnl.add(lbl);
-
 		backBtn.addActionListener(e -> cl.show(scrnMgr, "Assignments"));
 
 		crtAsgnmtBtn.addActionListener(new ActionListener() {
@@ -1056,9 +1051,13 @@ public class TeacherDash extends JFrame {
 
 				error_flag = conn.addAssignment(id, title, details, points, selectedDate);
 
+				if (error_flag == 0) {
+					details = "";
+				}
+
 				repaint();
 				revalidate();
-				JPanel crtAsgnmtPnl = bldCrtAsgnmtPnl();
+				JPanel crtAsgnmtPnl = bldCrtAsgnmtPnl(details);
 				scrnMgr.add(crtAsgnmtPnl, "Create Assignment");
 				cl.show(scrnMgr, "Create Assignment");
 			}
