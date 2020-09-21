@@ -36,15 +36,18 @@ public class StudentDash extends JFrame {
 	CardLayout cl;
 	JPanel scrnMgr;
 	dbConnection conn;
+	String tchrName;
 	int error_flag = -1;
 
 	// ------------------------------------------------------------------------ //
 	// Main Window
 	// ------------------------------------------------------------------------ //
 
-	StudentDash(dbConnection conn, String userName) {
+	StudentDash(dbConnection conn, String usrName) {
 		this.conn = conn;
-		this.userName = userName;
+		this.userName = usrName;
+		this.tchrName = conn.getTeacher(userName);
+		conn.setTeacher(tchrName);
 
 		this.setSize(900, 550);
 
@@ -194,7 +197,10 @@ public class StudentDash extends JFrame {
 		JPanel mainPnl = new JPanel(new GridLayout(2, 2, 5, 5));
 
 		JButton backBtn = new JButton("Back");
-		JTable asgnmtTbl = conn.getJTable("Assignments");
+		
+		String override_query = "!select * from assignments where teacherID='" + tchrName + "';";
+		
+		JTable asgnmtTbl = conn.getJTable(override_query);
 		JScrollPane asgnmtSP = new JScrollPane(asgnmtTbl);
 
 		JTextArea dtlArea = new JTextArea(28, 30);
@@ -238,8 +244,7 @@ public class StudentDash extends JFrame {
 					public void mouseClicked(MouseEvent e) {
 						int row = asgnmtTbl.getSelectedRow();
 						String selectedID = asgnmtTbl.getValueAt(row, 0).toString();
-
-						String details = conn.getAssgnmtDtl(selectedID);
+						String details = conn.getAssgnmtDtl(selectedID, 3);
 						dtlArea.setText(details);
 					}
 				});

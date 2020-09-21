@@ -29,6 +29,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 
 public class dbConnection {
 	boolean trueAll = false;
+	String tchrName;
 	String usrName;
 	String name;
 	String password;
@@ -268,8 +269,8 @@ public class dbConnection {
 	}
 
 	public int addAssignment(String id, String title, String details, String points, String dueDate) {
-		new_query = "insert into assignments values (" + id + ", '" + title + "', '" + details + "', " + points
-				+ ", '" + dueDate + "', '" + usrName + "');";
+		new_query = "insert into assignments values (" + id + ", '" + title + "', '" + details + "', " + points + ", '"
+				+ dueDate + "', '" + usrName + "');";
 
 		if (!StringUtils.isStrictlyNumeric(id) || !StringUtils.isStrictlyNumeric(points) || dueDate.length() < 10) {
 			return 4;
@@ -527,14 +528,14 @@ public class dbConnection {
 				i = 0;
 				k = 0;
 			}
-			
+
 			// if the number of seats already assigned to table i > table i's capacity,
 			// check next table
 			if (stsFilled.get(k) >= tableContents.get(i + 1)) {
 				i++;
 				k++;
 			}
-			
+
 			updateSingleSeat(tableContents.get(i), stdnts.get(j));
 
 			// increments the number of seats filled at index i by 1
@@ -612,9 +613,14 @@ public class dbConnection {
 		}
 	}
 
-	// maybe add a class reference to the teacher and add an or statement foo
-	public String getAssgnmtDtl(String idNum) {
-		new_query = "Select details from assignments where ID =" + idNum + " and teacherID='" + usrName + "';";
+	public String getAssgnmtDtl(String idNum, int priv) {
+
+		// foo
+		if (priv == 3) {
+			new_query = "Select details from assignments where ID =" + idNum + " and teacherID='" + tchrName + "'";
+		} else {
+			new_query = "Select details from assignments where ID =" + idNum + " and teacherID='" + usrName + "';";
+		}
 		String details = "";
 
 		try {
@@ -710,8 +716,8 @@ public class dbConnection {
 	}
 
 	public int recordAttendance(String studentID, String selectedDate, boolean is_present) {
-		new_query = "insert into attendance values('" + studentID + "', '" + selectedDate + "', " + is_present
-				+ ", '" + usrName + "');";
+		new_query = "insert into attendance values('" + studentID + "', '" + selectedDate + "', " + is_present + ", '"
+				+ usrName + "');";
 
 		try {
 			Statement stmt = conn.createStatement();
@@ -784,8 +790,8 @@ public class dbConnection {
 	}
 
 	public int logBehavior(String name, String date, String type, String comment) {
-		new_query = "insert into behavior values('" + name + "', '" + date + "', '" + type + "', '" + comment
-				+ "', '" + usrName + "');";
+		new_query = "insert into behavior values('" + name + "', '" + date + "', '" + type + "', '" + comment + "', '"
+				+ usrName + "');";
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate(new_query);
@@ -794,6 +800,30 @@ public class dbConnection {
 		}
 
 		return 0;
+	}
+
+	public String getTeacher(String usrName) {
+		String tchrName = "";
+
+		new_query = "select teacherID from students where ID='" + usrName + "';";
+
+		try {
+			Statement stmt = conn.createStatement();
+			result = stmt.executeQuery(new_query);
+
+			if (result.next()) {
+				tchrName = result.getString(1);
+			}
+			return tchrName;
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+
+		return tchrName;
+	}
+	
+	public void setTeacher(String teacherName) {
+		this.tchrName = teacherName;
 	}
 
 	public void setUser(String usrName) {
