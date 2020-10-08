@@ -41,9 +41,9 @@ public class dbConnection {
 
 	dbConnection() {
 		try {
-			this.name = "root";
-			this.password = "SQLPassword";
-			this.url = "jdbc:mysql://localhost:3306/teachasst";
+			this.name = "pp_admin";
+			this.password = "oshkoshprakash";
+			this.url = "jdbc:mysql://pied-piper-rds.cpdiz6ijxbup.us-east-2.rds.amazonaws.com/teachasst";
 
 			Connection conn = DriverManager.getConnection(url, name, password);
 			this.conn = conn;
@@ -128,9 +128,11 @@ public class dbConnection {
 
 	public int editUser(String userName, String newName, String newPW, int newPriv, String arg0) {
 		int flag = -1;
-
+		
+		// if the user was successfully deleted
 		flag = removeRow("Users", userName);
 		if (flag == 5) {
+			// attempt to create a new user with this data
 			flag = createUser(newName, newPW, newPriv, arg0);
 
 			if (flag == 0) {

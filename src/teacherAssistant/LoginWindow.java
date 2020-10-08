@@ -57,7 +57,7 @@ public class LoginWindow extends JFrame {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// sets title of window
-		this.setTitle("User Login");
+		this.setTitle("Purple Pandas");
 
 		JPanel mainPnl = new JPanel(new BorderLayout());
 
