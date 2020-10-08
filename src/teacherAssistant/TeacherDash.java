@@ -1019,7 +1019,7 @@ public class TeacherDash extends JFrame {
 
 		JPanel middleComposite = new JPanel(new GridLayout(1, 2, 5, 5));
 
-		JTable table = conn.getJTable("Assignments");
+		JTable table = conn.getJTable("assignments");
 		JScrollPane dataScrollPane = new JScrollPane(table);
 		middleComposite.add(dataScrollPane);
 		middleComposite.add(dtlPanl);
@@ -1075,7 +1075,7 @@ public class TeacherDash extends JFrame {
 		JButton delAsgnmtBtn = new JButton("Delete Assignment");
 		JButton backBtn = new JButton("Back");
 
-		JTable table = conn.getJTable("Assignments");
+		JTable table = conn.getJTable("assignments");
 		JScrollPane scrollPane = new JScrollPane(table);
 
 		delAsgnmtPnl.add(delAsgnmtLbl);
