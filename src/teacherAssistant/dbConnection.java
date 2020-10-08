@@ -39,7 +39,7 @@ public class dbConnection {
 	String emailDomain = "@hogwarts.com";
 	Connection conn;
 
-	dbConnection() {
+	dbConnection() { 
 		try {
 			this.name = "pp_admin";
 			this.password = "oshkoshprakash";

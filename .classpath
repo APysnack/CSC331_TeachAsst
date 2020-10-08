@@ -7,18 +7,18 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/SQL Connector/mysql-connector-java-8.0.21/mysql-connector-java-8.0.21.jar">
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/mysql-connector-java-8.0.21/mysql-connector-java-8.0.21.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/SQL Connector/commons-beanutils-core-1.8.2.jar"/>
-	<classpathentry kind="lib" path="C:/SQL Connector/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="C:/SQL Connector/databinding-1.0.jar"/>
-	<classpathentry kind="lib" path="C:/SQL Connector/filters-2.0.235.jar"/>
-	<classpathentry kind="lib" path="C:/SQL Connector/jxdatepicker-support-1.0.jar"/>
-	<classpathentry kind="lib" path="C:/SQL Connector/swing-worker-1.1.jar"/>
-	<classpathentry kind="lib" path="C:/SQL Connector/swingx-1.6.1.jar"/>
-	<classpathentry kind="lib" path="C:/SQL Connector/swingx-1.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/commons-beanutils-core-1.8.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/databinding-1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/filters-2.0.235.jar"/>
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/jxdatepicker-support-1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/swing-worker-1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/swingx-1.6.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/purle/eclipse-workspace/TeacherAssistant/external_jars/swingx-1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
