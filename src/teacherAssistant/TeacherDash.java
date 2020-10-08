@@ -218,7 +218,7 @@ public class TeacherDash extends JFrame {
 		picker.getUI();
 		rcrdAtndPnl.add(picker);
 
-		ArrayList allStdnts = conn.getAllNames("Students");
+		ArrayList allStdnts = conn.getAllNames("students");
 		JPanel stndtPnl = new JPanel();
 		List<JCheckBox> chkBoxList = new ArrayList<>();
 		ButtonGroup grp = new ButtonGroup();
@@ -483,7 +483,7 @@ public class TeacherDash extends JFrame {
 		ArrayList asgnmtLst = conn.getAllAsgnmts();
 		List<String> asgnmtDataLst = new ArrayList<>();
 
-		ArrayList allStdnts = conn.getAllNames("Students");
+		ArrayList allStdnts = conn.getAllNames("students");
 		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
 
 		JLabel lbl = new JLabel();
@@ -601,7 +601,7 @@ public class TeacherDash extends JFrame {
 	public JPanel bldClsBhvrPnl() {
 		JPanel clsBhvrPnl = new JPanel();
 
-		ArrayList allStdnts = conn.getAllNames("Students");
+		ArrayList allStdnts = conn.getAllNames("students");
 		ArrayList bhvrEnums = conn.getEnumFields("behavior", "bhvrtype");
 
 		JComboBox stdntMenu = new JComboBox(allStdnts.toArray());
@@ -621,7 +621,7 @@ public class TeacherDash extends JFrame {
 		picker.setFormats(new SimpleDateFormat("MM.dd.yyyy"));
 		picker.getUI();
 
-		JTable table = conn.getJTable("Behavior");
+		JTable table = conn.getJTable("behavior");
 		table.setVisible(true);
 		JScrollPane dataScrollPane = new JScrollPane(table);
 
@@ -699,7 +699,7 @@ public class TeacherDash extends JFrame {
 		asgnStg.add(tblMenu);
 
 		// gets list of all students and all students at the selected table
-		ArrayList allStdnts = conn.getAllNames("Students");
+		ArrayList allStdnts = conn.getAllNames("students");
 		ArrayList tblStdnts = conn.getTblStdnts(targetInt);
 		ArrayList unassignedStdnts = conn.getTblStdnts(0);
 
